@@ -2,11 +2,736 @@
 layout: post
 title: "服务器安全与反向代理配置指南"
 date: 2026-04-25
-categories: Blog
-tags: []
+categories: 服务器安全
+tags: ["安全", "Linux", "Nginx"]
 excerpt: "从裸奔到武装到牙齿的服务器安全加固实战。包括 fail2ban 防暴力破解、UFW 防火墙配置、端口收敛和反向代理跨域问题修复。"
 image: "https://whalemalus.com/file/cover-security-2024"
 original_url: "https://whalemalus.com/articles/server-security-guide"
 ---
 
-mysql: [Warning] Using a password on the command line interface can be insecure.\n# 服务器安全加固与反向代理配置实战指南\n\n> **摘要**：本文记录了一次完整的服务器安全加固过程，包括 fail2ban 防暴力破解、UFW 防火墙配置、端口收敛，以及 NPM 反向代理的域名访问配置和 OpenClaw 跨域问题修复。从"裸奔"到"武装到牙齿"的实战记录。\n>\n> **关键词**：`服务器安全` `fail2ban` `UFW` `反向代理` `跨域配置`\n\n---\n\n## 楔子\n\n上线第一天，服务器就被扫了。\n\n打开 fail2ban 的日志一看——过去 12 小时内，有 347 次 SSH 登录失败尝试，来自 23 个不同的 IP。最疯狂的一个 IP，在 10 分钟内尝试了 89 次。\n\n服务器刚搭好的时候，我只顾着把服务跑起来，安全的事想着"回头再说"。结果"回头"的速度，远没有攻击者快。\n\n这件事让我意识到：安全不是"以后再说"的事，而是"现在就得做"的事。\n\n于是就有了这次安全加固——从安装 fail2ban 到配置 UFW 防火墙，从收敛端口到配置反向代理，一步到位。这篇文章就是整个过程的完整记录。\n\n\n## 全景地图：服务器安全体系\n\n> 鸟瞰服务器安全防护的完整体系，理解各层级之间的关系\n\n### 安全防护层级\n\n```\n┌─────────────────────────────────────────────────────────────┐\n│                    服务器安全防护体系                         │\n├─────────────────────────────────────────────────────────────┤\n│                                                             │\n│  ┌─────────────────────────────────────────────────────┐   │\n│  │ 第1层：网络安全                                      │   │\n│  │ • 防火墙 (UFW)                                      │   │\n│  │ • 端口管理                                          │   │\n│  │ • IP 白名单                                         │   │\n│  └─────────────────────────────────────────────────────┘   │\n│                          │                                  │\n│                          ▼                                  │\n│  ┌─────────────────────────────────────────────────────┐   │\n│  │ 第2层：访问控制                                      │   │\n│  │ • SSH 密钥认证                                      │   │\n│  │ • fail2ban 防暴力破解                               │   │\n│  │ • 强密码策略                                        │   │\n│  └─────────────────────────────────────────────────────┘   │\n│                          │                                  │\n│                          ▼                                  │\n│  ┌─────────────────────────────────────────────────────┐   │\n│  │ 第3层：应用安全                                      │   │\n│  │ • HTTPS 加密                                        │   │\n│  │ • 反向代理                                          │   │\n│  │ • 容器隔离                                          │   │\n│  └─────────────────────────────────────────────────────┘   │\n│                          │                                  │\n│                          ▼                                  │\n│  ┌─────────────────────────────────────────────────────┐   │\n│  │ 第4层：数据安全                                      │   │\n│  │ • 定期备份                                          │   │\n│  │ • 日志审计                                          │   │\n│  │ • 敏感信息加密                                      │   │\n│  └─────────────────────────────────────────────────────┘   │\n│                                                             │\n└─────────────────────────────────────────────────────────────┘\n```\n\n### 本文的学习路径\n\n```\n安全概述 → 防火墙 → SSH 安全 → fail2ban → 反向代理 → 最佳实践\n   │          │          │          │          │          │\n   ▼          ▼          ▼          ▼          ▼          ▼\n 威胁模型    UFW配置    密钥认证    防暴力破解   NPM配置    安全清单\n```\n\n## 引言\n\n一台新服务器上线后，最紧迫的事情不是部署应用，而是**安全加固**。\n\n默认配置的服务器就像一扇没上锁的门——SSH 端口对外开放、没有防火墙、没有入侵检测。任何一个脚本小子都可以用自动化工具在几分钟内攻破。\n\n本文将带你完成以下安全加固步骤：\n- **fail2ban**：自动封禁暴力破解 IP，保护 SSH\n- **UFW 防火墙**：只开放必要端口，关闭所有不必要的暴露面\n- **端口收敛**：将所有管理面板和应用服务通过反向代理访问，不直接暴露端口\n- **跨域修复**：解决 OpenClaw 等应用通过反向代理访问时的 WebSocket 连接问题\n\n每一步都有完整的配置文件和验证命令。目标是：**让服务器从"裸奔"变成"武装到牙齿"。**\n\n---\n\n## 一、服务器安全加固\n\n### 1.1 安装并配置 fail2ban\n\nfail2ban 用于自动封禁暴力破解IP，保护SSH安全。\n\n```bash\n# 安装 fail2ban\napt-get install -y fail2ban\n\n# 创建配置文件\ncat > /etc/fail2ban/jail.local << 'EOF'\n[DEFAULT]\n# 封禁时间：1小时\nbantime = 3600\n# 观察时间窗口：10分钟\nfindtime = 600\n# 最大失败次数：5次\nmaxretry = 5\n# 使用systemd日志\nbackend = systemd\n\n[sshd]\nenabled = true\nport = ssh\nfilter = sshd\nlogpath = /var/log/auth.log\nmaxretry = 5\nbantime = 3600\n\n# 重复犯罪者永久封禁\n[recidive]\nenabled = true\nfilter = recidive\nlogpath = /var/log/fail2ban.log\nmaxretry = 3\nbantime = 86400\nfindtime = 86400\nEOF\n\n# 启动并设置开机自启\nsystemctl enable fail2ban\nsystemctl restart fail2ban\n\n# 查看状态\nfail2ban-client status\nfail2ban-client status sshd\n```\n\n**验证：**\n```bash\n# 查看已封禁的IP\nfail2ban-client status sshd | grep "Banned IP"\n```\n\n---\n\n### 1.2 配置 UFW 防火墙\n\n```bash\n# 允许SSH（必须先允许，否则会锁死自己）\nufw allow 22/tcp comment "SSH"\n\n# 允许HTTP/HTTPS（NPM需要）\nufw allow 80/tcp comment "HTTP"\nufw allow 443/tcp comment "HTTPS"\n\n# 设置默认策略：拒绝入站，允许出站\nufw default deny incoming\nufw default allow outgoing\n\n# 启用防火墙\necho "y" | ufw enable\n\n# 查看状态\nufw status verbose\n```\n\n**最终防火墙规则：**\n```\nTo                         Action      From\n--                         ------      ----\n22/tcp                     ALLOW       Anywhere    # SSH\n80/tcp                     ALLOW       Anywhere    # HTTP\n443/tcp                    ALLOW       Anywhere    # HTTPS\n```\n\n**注意：** 管理面板端口（如1Panel的18581、NPM的30081）不再对外暴露，通过NPM反向代理+域名访问。\n\n---\n\n### 1.3 允许Docker网络访问内部端口\n\nNPM容器需要访问宿主机上的服务（如1Panel），需要添加防火墙规则：\n\n```bash\n# 允许Docker网络访问1Panel端口\nufw allow from 172.18.0.0/16 to any port 18581\n```\n\n---\n\n## 二、Cloudflare DNS 配置\n\n### 2.1 添加子域名DNS记录\n\n在 Cloudflare 控制台为每个服务添加A记录，开启代理（橙色云朵）：\n\n| 域名 | 类型 | 目标 | 代理状态 |\n|------|------|------|----------|\n| whalemalus.com | A | 服务器IP | 🟠 已代理 |\n| www.whalemalus.com | CNAME | whalemalus.com | 🟠 已代理 |\n| panel.whalemalus.com | A | 服务器IP | 🟠 已代理 |\n| openclaw.whalemalus.com | A | 服务器IP | 🟠 已代理 |\n\n**通过API批量添加（推荐）：**\n\n```bash\n# 使用Cloudflare API添加DNS记录\n# 注意：用完后请立即删除API Token\n\nTOKEN=*** Token"\nZONE_ID="你的Zone ID"\n\n# 添加 panel 子域名\ncurl -s -X POST "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records" \n  -H "Authorization: Bearer *** \n  -H "Content-Type: application/json" \n  --data '{"type":"A","name":"panel","content":"<你的服务器IP>","ttl":1,"proxied":true}'\n\n# 添加 openclaw 子域名\ncurl -s -X POST "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records" \n  -H "Authorization: Bearer *** \n  -H "Content-Type: application/json" \n  --data '{"type":"A","name":"openclaw","content":"<你的服务器IP>","ttl":1,"proxied":true}'\n```\n\n### 2.2 配置SSL证书\n\n1. 在 Cloudflare 控制台 → SSL/TLS → 源服务器 → 创建证书\n2. 下载证书和私钥\n3. 在 NPM 中上传证书\n\n---\n\n## 三、NPM 反向代理配置\n\n### 3.1 登录NPM\n\n```bash\n# 获取NPM API Token\ncurl -s -X POST http://localhost:30081/api/tokens \n  -H "Content-Type: application/json" \n  -d '{"identity":"<管理员邮箱>","secret": "***"}'\n```\n\n### 3.2 创建代理主机\n\n**博客（已有）：**\n- 域名：`whalemalus.com`, `www.whalemalus.com`\n- 转发：`http://172.18.0.1:2222`\n- SSL：启用\n\n**1Panel管理面板：**\n```bash\ncurl -s -X POST http://localhost:30081/api/nginx/proxy-hosts \n  -H "Authorization: Bearer *** \n  -H "Content-Type: application/json" \n  -d '{\n    "domain_names": ["panel.whalemalus.com"],\n    "forward_scheme": "http",\n    "forward_host": "172.18.0.1",\n    "forward_port": 18581,\n    "ssl_forced": true,\n    "block_exploits": true\n  }'\n```\n\n**OpenClaw：**\n```bash\ncurl -s -X POST http://localhost:30081/api/nginx/proxy-hosts \n  -H "Authorization: Bearer *** \n  -H "Content-Type: application/json" \n  -d '{\n    "domain_names": ["openclaw.whalemalus.com"],\n    "forward_scheme": "http",\n    "forward_host": "172.18.0.2",\n    "forward_port": 18789,\n    "ssl_forced": true,\n    "block_exploits": true\n  }'\n```\n\n### 3.3 添加SSL证书到代理主机\n\n```bash\n# 更新代理主机，添加证书ID\ncurl -s -X PUT http://localhost:30081/api/nginx/proxy-hosts/$PROXY_ID \n  -H "Authorization: Bearer *** \n  -H "Content-Type: application/json" \n  -d '{\n    "certificate_id": 1,\n    "ssl_forced": true,\n    "http2_support": true\n  }'\n```\n\n### 3.4 1Panel 安全入口配置\n\n1Panel默认启用安全入口，需要通过特定路径访问。\n\n**方案一：禁用安全入口（推荐）**\n```bash\n# 修改1Panel数据库\nsqlite3 /opt/1panel/db/core.db "UPDATE settings SET value='' WHERE key='SecurityEntrance';"\n\n# 重启1Panel\nsystemctl restart 1panel-core\n```\n\n**方案二：保留安全入口**\n如果保留安全入口，需要在NPM中配置路径重写：\n```json\n{\n  "advanced_config": "location / {\n    proxy_pass http://172.18.0.1:18581/mypanel;\n}"\n}\n```\n\n### 3.5 验证代理配置\n\n```bash\n# 查看所有代理主机\ncurl -s http://localhost:30081/api/nginx/proxy-hosts \n  -H "Authorization: Bearer *** | python3 -c "\nimport sys,json\nfor p in json.load(sys.stdin):\n    domains = ', '.join(p['domain_names'])\n    print(f"{domains} → {p['forward_host']}:{p['forward_port']}")\n"\n```\n\n---\n\n## 四、OpenClaw 跨域访问配置\n\n### 4.1 问题描述\n\n通过域名访问 OpenClaw 时，WebSocket 连接报错：\n```\norigin not allowed (open the Control UI from the gateway host or allow it in gateway.controlUi.allowedOrigins)\n```\n\n### 4.2 原因分析\n\nOpenClaw 的 `gateway.controlUi.allowedOrigins` 默认只允许本地访问：\n```json\n"allowedOrigins": [\n    "http://127.0.0.1:18789",\n    "http://<服务器IP>:18789"\n]\n```\n\n需要添加域名 `https://openclaw.whalemalus.com`。\n\n### 4.3 解决方案\n\n**编辑配置文件：**\n```bash\nvi /opt/1panel/apps/<app-name>/<app-name>/data/conf/openclaw.json\n```\n\n**修改 `gateway.controlUi.allowedOrigins`：**\n```json\n{\n  "gateway": {\n    "controlUi": {\n      "allowedOrigins": [\n        "http://127.0.0.1:18789",\n        "http://<服务器IP>:18789",\n        "https://openclaw.whalemalus.com"\n      ]\n    }\n  }\n}\n```\n\n**重启容器：**\n```bash\ncd /opt/1panel/apps/<app-name>/<app-name>\ndocker compose restart openclaw\n```\n\n**验证配置：**\n```bash\ncat /opt/1panel/apps/<app-name>/<app-name>/data/conf/openclaw.json | python3 -c "\nimport sys, json\nconfig = json.load(sys.stdin)\nprint('allowedOrigins:', config['gateway']['controlUi']['allowedOrigins'])\n"\n```\n\n---\n\n## 五、最终访问方式\n\n### 5.1 服务访问地址\n\n| 服务 | 访问地址 | 说明 |\n|------|----------|------|\n| 博客 | https://whalemalus.com | 公开访问 |\n| 1Panel | https://panel.whalemalus.com | 管理面板 |\n| OpenClaw | https://openclaw.whalemalus.com | AI助手 |\n\n### 5.2 端口状态\n\n| 端口 | 状态 | 说明 |\n|------|------|------|\n| 22 | ✅ 开放 | SSH |\n| 80 | ✅ 开放 | HTTP |\n| 443 | ✅ 开放 | HTTPS |\n| 2222 | ❌ 关闭 | 博客（仅通过域名访问） |\n| 18581 | ❌ 关闭 | 1Panel（仅通过域名访问） |\n| 18789 | ❌ 关闭 | OpenClaw（仅通过域名访问） |\n| 30081 | ❌ 关闭 | NPM管理（通过1Panel管理） |\n\n---\n\n## 六、安全检查清单\n\n### 6.1 已完成的安全措施\n\n- [x] 安装并配置 fail2ban\n- [x] 启用 UFW 防火墙\n- [x] 只开放必要端口（22、80、443）\n- [x] 所有服务通过 HTTPS 访问\n- [x] 真实IP通过 Cloudflare 隐藏\n- [x] 管理面板通过域名访问，不暴露端口\n- [x] OpenClaw 配置跨域访问白名单\n\n### 6.2 待完成的安全措施\n\n- [ ] 禁用SSH root登录\n- [ ] 配置SSH密钥认证\n- [ ] MySQL禁止远程root连接\n- [ ] Redis设置密码\n- [ ] 定期更新系统和软件\n\n---\n\n## 七、常见问题\n\n### Q1: fail2ban 误封了合法IP怎么办？\n\n```bash\n# 查看已封禁IP\nfail2ban-client status sshd\n\n# 解封指定IP\nfail2ban-client set sshd unbanip <IP地址>\n```\n\n### Q2: 如何查看防火墙规则？\n\n```bash\nufw status verbose\n```\n\n### Q3: NPM代理的容器之间如何通信？\n\nNPM和OpenClaw都在 `1panel-network` 网络中，可以直接通过容器名或IP通信：\n- NPM: `172.18.0.3`\n- OpenClaw: `172.18.0.2`\n- 网关: `172.18.0.1`\n\n### Q4: 如何更新OpenClaw配置？\n\n```bash\n# 编辑配置文件\nvi /opt/1panel/apps/<app-name>/<app-name>/data/conf/openclaw.json\n\n# 重启容器\ncd /opt/1panel/apps/<app-name>/<app-name>\ndocker compose restart openclaw\n```\n\n### Q5: Cloudflare API Token 用完后如何删除？\n\n访问 https://dash.cloudflare.com/profile/api-tokens ，找到对应Token点击删除。\n\n---\n\n## 八、信息脱敏说明\n\n本文档已做以下脱敏处理：\n\n| 原始内容 | 脱敏后 |\n|----------|--------|\n| 公网IP地址 | `<你的服务器IP>` |\n| 管理员用户名 | `<管理员>` |\n| 密码/Token | `<密码>` 或 `<API Token>` |\n| 服务器路径 | 保留通用路径 |\n| Docker容器名 | 保留通用名称 |\n\n**发布前检查命令：**\n```bash\n# 检查是否包含真实IP\ngrep -oE '[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}' 文件.md | sort -u\n\n# 检查是否包含敏感信息\ngrep -iE 'password|密码|token|secret' 文件.md\n```\n\n---\n\n*文档版本：2026-04-25*\n*环境：Ubuntu + Docker + 1Panel + NPM + Cloudflare*\n\n---\n\n## 九、问题排查与解决方案\n\n### 9.1 1Panel 安全入口问题\n\n**问题描述：**\n访问 1Panel 时显示 "Access Temporarily Unavailable"，无法进入登录页面。\n\n**原因分析：**\n1Panel 默认启用了安全入口（SecurityEntrance），必须通过特定路径 `/mypanel` 访问。\n\n**解决方案：**\n\n**方案一：禁用安全入口（推荐）**\n```bash\n# 修改数据库\nsqlite3 /opt/1panel/db/core.db "UPDATE settings SET value='' WHERE key='SecurityEntrance';"\n\n# 重启服务\nsystemctl restart 1panel-core\n```\n\n**方案二：保留安全入口**\n在 NPM 中配置路径重写，将 `/` 重定向到 `/mypanel`。\n\n---\n\n### 9.2 NPM 无法代理到自身\n\n**问题描述：**\n创建 `npm.whalemalus.com` 代理主机，指向 NPM 自身的管理端口（30081），但访问时超时或无法连接。\n\n**原因分析：**\nNPM 无法代理到自身，会产生循环代理问题。NPM 容器内部的管理端口是 81，映射到主机的 30081。当 NPM 尝试代理到 `172.18.0.1:30081` 时，实际上是在请求自己，导致循环。\n\n**解决方案：**\n- **不创建 NPM 自身的代理**，直接通过 1Panel 管理 NPM\n- 或者使用其他反向代理（如 Caddy）来代理 NPM\n\n**删除错误的代理：**\n```bash\nTOKEN=*** -s -X POST http://localhost:30081/api/tokens \n  -H "Content-Type: application/json" \n  -d '{"identity":"<管理员邮箱>","secret": "***"}' | python3 -c "import sys,json; print(json.load(sys.stdin)['token'])")\n\n# 删除代理主机\ncurl -s -X DELETE http://localhost:30081/api/nginx/proxy-hosts/<代理ID> \n  -H "Authorization: Bearer *** 9.3 OpenClaw 跨域访问被拒绝\n\n**问题描述：**\n通过域名访问 OpenClaw Control UI 时，输入 Token 后无法连接，报错：\n```\norigin not allowed (open the Control UI from the gateway host or allow it in gateway.controlUi.allowedOrigins)\n```\n\n**原因分析：**\nOpenClaw 的 `gateway.controlUi.allowedOrigins` 默认只允许本地访问，不包含域名。\n\n**解决方案：**\n编辑配置文件，添加域名到白名单：\n```bash\nvi /opt/1panel/apps/<app-name>/data/conf/openclaw.json\n```\n\n修改 `gateway.controlUi.allowedOrigins`：\n```json\n{\n  "gateway": {\n    "controlUi": {\n      "allowedOrigins": [\n        "http://127.0.0.1:18789",\n        "http://<服务器IP>:18789",\n        "https://openclaw.<your-domain.com>"\n      ]\n    }\n  }\n}\n```\n\n重启容器：\n```bash\ncd /opt/1panel/apps/<app-name>\ndocker compose restart openclaw\n```\n\n---\n\n### 9.4 SSH 暴力破解攻击\n\n**问题描述：**\n服务器 SSH 端口遭受大量暴力破解尝试，日志显示数千次失败登录。\n\n**解决方案：**\n安装并配置 fail2ban 自动封禁攻击IP（详见第一章）。\n\n**查看已封禁IP：**\n```bash\nfail2ban-client status sshd\n```\n\n**手动解封IP：**\n```bash\nfail2ban-client set sshd unbanip <IP地址>\n```\n\n---\n\n### 9.5 博客文章显示乱码\n\n**问题描述：**\n通过数据库直接插入的文章内容在博客前端显示为乱码。\n\n**原因分析：**\nMySQL 客户端连接编码不正确，中文字符被错误编码。\n\n**解决方案：**\n使用 Base64 编码插入数据：\n```bash\n# 将内容编码为 Base64\nCONTENT=$(cat article.md | base64 -w 0)\n\n# 使用 FROM_BASE64 解码插入\ndocker exec dimstack-mysql mysql -uroot -p<密码> dim_stack -e \n  "UPDATE article SET article_content = FROM_BASE64('$CONTENT') WHERE id = <文章ID>;"\n```\n\n---\n\n### 9.6 Docker 容器间网络不通\n\n**问题描述：**\nNPM 无法代理到其他容器（如 OpenClaw），显示 502 错误。\n\n**原因分析：**\n容器不在同一个 Docker 网络中，无法通过容器名或IP通信。\n\n**解决方案：**\n确保容器在同一个网络中：\n```bash\n# 查看容器网络\ndocker inspect <容器名> --format '{{json .NetworkSettings.Networks}}'\n\n# 将容器加入网络\ndocker network connect <网络名> <容器名>\n```\n\n---\n\n### 9.7 防火墙阻止 Docker 流量\n\n**问题描述：**\n启用 UFW 防火墙后，NPM 无法代理到主机上的服务（如 1Panel）。\n\n**原因分析：**\nDocker 容器访问主机端口时，流量被防火墙拦截。\n\n**解决方案：**\n添加规则允许 Docker 网络访问：\n```bash\nufw allow from 172.18.0.0/16 to any port <端口号>\n```\n\n---\n\n### 9.8 Cloudflare Origin 证书不匹配\n\n**问题描述：**\nNPM 中上传 Cloudflare Origin 证书后，访问域名显示证书错误。\n\n**原因分析：**\n证书的域名列表不包含当前访问的域名。\n\n**解决方案：**\n1. 在 Cloudflare 控制台重新生成证书，确保包含所有需要的域名\n2. 域名列表应包括：`*.your-domain.com` 和 `your-domain.com`\n\n---\n\n### 9.9 1Panel 密码忘记\n\n**问题描述：**\n忘记 1Panel 登录密码。\n\n**解决方案：**\n```bash\n# 重置密码\n1pctl update password\n```\n\n按照提示输入新密码即可。\n\n---\n\n### 9.10 NPM 默认密码忘记\n\n**问题描述：**\n忘记 NPM 管理面板密码。\n\n**解决方案：**\n```bash\n# 重置 NPM 数据库中的密码\ndocker exec <npm容器名> sqlite3 /data/database.sqlite \n  "UPDATE auth SET password='$2a$10$xxxxx' WHERE id=1;"\n```\n\n或者删除 NPM 数据目录重新初始化：\n```bash\ncd /opt/1panel/apps/nginx-proxy-manager/nginx-proxy-manager\nrm -rf data/database.sqlite\ndocker compose restart\n```\n\n---\n\n*更多问题排查请参考各章节的详细说明*
+# 服务器安全加固与反向代理配置实战指南
+
+> **摘要**：本文记录了一次完整的服务器安全加固过程，包括 fail2ban 防暴力破解、UFW 防火墙配置、端口收敛，以及 NPM 反向代理的域名访问配置和 OpenClaw 跨域问题修复。从"裸奔"到"武装到牙齿"的实战记录。
+>
+> **关键词**：`服务器安全` `fail2ban` `UFW` `反向代理` `跨域配置`
+
+---
+
+## 楔子
+
+上线第一天，服务器就被扫了。
+
+打开 fail2ban 的日志一看——过去 12 小时内，有 347 次 SSH 登录失败尝试，来自 23 个不同的 IP。最疯狂的一个 IP，在 10 分钟内尝试了 89 次。
+
+服务器刚搭好的时候，我只顾着把服务跑起来，安全的事想着"回头再说"。结果"回头"的速度，远没有攻击者快。
+
+这件事让我意识到：安全不是"以后再说"的事，而是"现在就得做"的事。
+
+于是就有了这次安全加固——从安装 fail2ban 到配置 UFW 防火墙，从收敛端口到配置反向代理，一步到位。这篇文章就是整个过程的完整记录。
+
+
+## 全景地图：服务器安全体系
+
+> 鸟瞰服务器安全防护的完整体系，理解各层级之间的关系
+
+### 安全防护层级
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    服务器安全防护体系                         │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ 第1层：网络安全                                      │   │
+│  │ • 防火墙 (UFW)                                      │   │
+│  │ • 端口管理                                          │   │
+│  │ • IP 白名单                                         │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                          │                                  │
+│                          ▼                                  │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ 第2层：访问控制                                      │   │
+│  │ • SSH 密钥认证                                      │   │
+│  │ • fail2ban 防暴力破解                               │   │
+│  │ • 强密码策略                                        │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                          │                                  │
+│                          ▼                                  │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ 第3层：应用安全                                      │   │
+│  │ • HTTPS 加密                                        │   │
+│  │ • 反向代理                                          │   │
+│  │ • 容器隔离                                          │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                          │                                  │
+│                          ▼                                  │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ 第4层：数据安全                                      │   │
+│  │ • 定期备份                                          │   │
+│  │ • 日志审计                                          │   │
+│  │ • 敏感信息加密                                      │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 本文的学习路径
+
+```
+安全概述 → 防火墙 → SSH 安全 → fail2ban → 反向代理 → 最佳实践
+   │          │          │          │          │          │
+   ▼          ▼          ▼          ▼          ▼          ▼
+ 威胁模型    UFW配置    密钥认证    防暴力破解   NPM配置    安全清单
+```
+
+## 引言
+
+一台新服务器上线后，最紧迫的事情不是部署应用，而是**安全加固**。
+
+默认配置的服务器就像一扇没上锁的门——SSH 端口对外开放、没有防火墙、没有入侵检测。任何一个脚本小子都可以用自动化工具在几分钟内攻破。
+
+本文将带你完成以下安全加固步骤：
+- **fail2ban**：自动封禁暴力破解 IP，保护 SSH
+- **UFW 防火墙**：只开放必要端口，关闭所有不必要的暴露面
+- **端口收敛**：将所有管理面板和应用服务通过反向代理访问，不直接暴露端口
+- **跨域修复**：解决 OpenClaw 等应用通过反向代理访问时的 WebSocket 连接问题
+
+每一步都有完整的配置文件和验证命令。目标是：**让服务器从"裸奔"变成"武装到牙齿"。**
+
+---
+
+## 一、服务器安全加固
+
+### 1.1 安装并配置 fail2ban
+
+fail2ban 用于自动封禁暴力破解IP，保护SSH安全。
+
+```bash
+# 安装 fail2ban
+apt-get install -y fail2ban
+
+# 创建配置文件
+cat > /etc/fail2ban/jail.local << 'EOF'
+[DEFAULT]
+# 封禁时间：1小时
+bantime = 3600
+# 观察时间窗口：10分钟
+findtime = 600
+# 最大失败次数：5次
+maxretry = 5
+# 使用systemd日志
+backend = systemd
+
+[sshd]
+enabled = true
+port = ssh
+filter = sshd
+logpath = /var/log/auth.log
+maxretry = 5
+bantime = 3600
+
+# 重复犯罪者永久封禁
+[recidive]
+enabled = true
+filter = recidive
+logpath = /var/log/fail2ban.log
+maxretry = 3
+bantime = 86400
+findtime = 86400
+EOF
+
+# 启动并设置开机自启
+systemctl enable fail2ban
+systemctl restart fail2ban
+
+# 查看状态
+fail2ban-client status
+fail2ban-client status sshd
+```
+
+**验证：**
+```bash
+# 查看已封禁的IP
+fail2ban-client status sshd | grep "Banned IP"
+```
+
+---
+
+### 1.2 配置 UFW 防火墙
+
+```bash
+# 允许SSH（必须先允许，否则会锁死自己）
+ufw allow 22/tcp comment "SSH"
+
+# 允许HTTP/HTTPS（NPM需要）
+ufw allow 80/tcp comment "HTTP"
+ufw allow 443/tcp comment "HTTPS"
+
+# 设置默认策略：拒绝入站，允许出站
+ufw default deny incoming
+ufw default allow outgoing
+
+# 启用防火墙
+echo "y" | ufw enable
+
+# 查看状态
+ufw status verbose
+```
+
+**最终防火墙规则：**
+```
+To                         Action      From
+--                         ------      ----
+22/tcp                     ALLOW       Anywhere    # SSH
+80/tcp                     ALLOW       Anywhere    # HTTP
+443/tcp                    ALLOW       Anywhere    # HTTPS
+```
+
+**注意：** 管理面板端口（如1Panel的18581、NPM的30081）不再对外暴露，通过NPM反向代理+域名访问。
+
+---
+
+### 1.3 允许Docker网络访问内部端口
+
+NPM容器需要访问宿主机上的服务（如1Panel），需要添加防火墙规则：
+
+```bash
+# 允许Docker网络访问1Panel端口
+ufw allow from 172.18.0.0/16 to any port 18581
+```
+
+---
+
+## 二、Cloudflare DNS 配置
+
+### 2.1 添加子域名DNS记录
+
+在 Cloudflare 控制台为每个服务添加A记录，开启代理（橙色云朵）：
+
+| 域名 | 类型 | 目标 | 代理状态 |
+|------|------|------|----------|
+| whalemalus.com | A | 服务器IP | 🟠 已代理 |
+| www.whalemalus.com | CNAME | whalemalus.com | 🟠 已代理 |
+| panel.whalemalus.com | A | 服务器IP | 🟠 已代理 |
+| openclaw.whalemalus.com | A | 服务器IP | 🟠 已代理 |
+
+**通过API批量添加（推荐）：**
+
+```bash
+# 使用Cloudflare API添加DNS记录
+# 注意：用完后请立即删除API Token
+
+TOKEN=*** Token"
+ZONE_ID="你的Zone ID"
+
+# 添加 panel 子域名
+curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records" 
+  -H "Authorization: Bearer *** 
+  -H "Content-Type: application/json" 
+  --data '{"type":"A","name":"panel","content":"<你的服务器IP>","ttl":1,"proxied":true}'
+
+# 添加 openclaw 子域名
+curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records" 
+  -H "Authorization: Bearer *** 
+  -H "Content-Type: application/json" 
+  --data '{"type":"A","name":"openclaw","content":"<你的服务器IP>","ttl":1,"proxied":true}'
+```
+
+### 2.2 配置SSL证书
+
+1. 在 Cloudflare 控制台 → SSL/TLS → 源服务器 → 创建证书
+2. 下载证书和私钥
+3. 在 NPM 中上传证书
+
+---
+
+## 三、NPM 反向代理配置
+
+### 3.1 登录NPM
+
+```bash
+# 获取NPM API Token
+curl -s -X POST http://localhost:30081/api/tokens 
+  -H "Content-Type: application/json" 
+  -d '{"identity":"<管理员邮箱>","secret": "***"}'
+```
+
+### 3.2 创建代理主机
+
+**博客（已有）：**
+- 域名：`whalemalus.com`, `www.whalemalus.com`
+- 转发：`http://172.18.0.1:2222`
+- SSL：启用
+
+**1Panel管理面板：**
+```bash
+curl -s -X POST http://localhost:30081/api/nginx/proxy-hosts 
+  -H "Authorization: Bearer *** 
+  -H "Content-Type: application/json" 
+  -d '{
+    "domain_names": ["panel.whalemalus.com"],
+    "forward_scheme": "http",
+    "forward_host": "172.18.0.1",
+    "forward_port": 18581,
+    "ssl_forced": true,
+    "block_exploits": true
+  }'
+```
+
+**OpenClaw：**
+```bash
+curl -s -X POST http://localhost:30081/api/nginx/proxy-hosts 
+  -H "Authorization: Bearer *** 
+  -H "Content-Type: application/json" 
+  -d '{
+    "domain_names": ["openclaw.whalemalus.com"],
+    "forward_scheme": "http",
+    "forward_host": "172.18.0.2",
+    "forward_port": 18789,
+    "ssl_forced": true,
+    "block_exploits": true
+  }'
+```
+
+### 3.3 添加SSL证书到代理主机
+
+```bash
+# 更新代理主机，添加证书ID
+curl -s -X PUT http://localhost:30081/api/nginx/proxy-hosts/$PROXY_ID 
+  -H "Authorization: Bearer *** 
+  -H "Content-Type: application/json" 
+  -d '{
+    "certificate_id": 1,
+    "ssl_forced": true,
+    "http2_support": true
+  }'
+```
+
+### 3.4 1Panel 安全入口配置
+
+1Panel默认启用安全入口，需要通过特定路径访问。
+
+**方案一：禁用安全入口（推荐）**
+```bash
+# 修改1Panel数据库
+sqlite3 /opt/1panel/db/core.db "UPDATE settings SET value='' WHERE key='SecurityEntrance';"
+
+# 重启1Panel
+systemctl restart 1panel-core
+```
+
+**方案二：保留安全入口**
+如果保留安全入口，需要在NPM中配置路径重写：
+```json
+{
+  "advanced_config": "location / {
+    proxy_pass http://172.18.0.1:18581/mypanel;
+}"
+}
+```
+
+### 3.5 验证代理配置
+
+```bash
+# 查看所有代理主机
+curl -s http://localhost:30081/api/nginx/proxy-hosts 
+  -H "Authorization: Bearer *** | python3 -c "
+import sys,json
+for p in json.load(sys.stdin):
+    domains = ', '.join(p['domain_names'])
+    print(f"{domains} → {p['forward_host']}:{p['forward_port']}")
+"
+```
+
+---
+
+## 四、OpenClaw 跨域访问配置
+
+### 4.1 问题描述
+
+通过域名访问 OpenClaw 时，WebSocket 连接报错：
+```
+origin not allowed (open the Control UI from the gateway host or allow it in gateway.controlUi.allowedOrigins)
+```
+
+### 4.2 原因分析
+
+OpenClaw 的 `gateway.controlUi.allowedOrigins` 默认只允许本地访问：
+```json
+"allowedOrigins": [
+    "http://127.0.0.1:18789",
+    "http://<服务器IP>:18789"
+]
+```
+
+需要添加域名 `https://openclaw.whalemalus.com`。
+
+### 4.3 解决方案
+
+**编辑配置文件：**
+```bash
+vi /opt/1panel/apps/<app-name>/<app-name>/data/conf/openclaw.json
+```
+
+**修改 `gateway.controlUi.allowedOrigins`：**
+```json
+{
+  "gateway": {
+    "controlUi": {
+      "allowedOrigins": [
+        "http://127.0.0.1:18789",
+        "http://<服务器IP>:18789",
+        "https://openclaw.whalemalus.com"
+      ]
+    }
+  }
+}
+```
+
+**重启容器：**
+```bash
+cd /opt/1panel/apps/<app-name>/<app-name>
+docker compose restart openclaw
+```
+
+**验证配置：**
+```bash
+cat /opt/1panel/apps/<app-name>/<app-name>/data/conf/openclaw.json | python3 -c "
+import sys, json
+config = json.load(sys.stdin)
+print('allowedOrigins:', config['gateway']['controlUi']['allowedOrigins'])
+"
+```
+
+---
+
+## 五、最终访问方式
+
+### 5.1 服务访问地址
+
+| 服务 | 访问地址 | 说明 |
+|------|----------|------|
+| 博客 | https://whalemalus.com | 公开访问 |
+| 1Panel | https://panel.whalemalus.com | 管理面板 |
+| OpenClaw | https://openclaw.whalemalus.com | AI助手 |
+
+### 5.2 端口状态
+
+| 端口 | 状态 | 说明 |
+|------|------|------|
+| 22 | ✅ 开放 | SSH |
+| 80 | ✅ 开放 | HTTP |
+| 443 | ✅ 开放 | HTTPS |
+| 2222 | ❌ 关闭 | 博客（仅通过域名访问） |
+| 18581 | ❌ 关闭 | 1Panel（仅通过域名访问） |
+| 18789 | ❌ 关闭 | OpenClaw（仅通过域名访问） |
+| 30081 | ❌ 关闭 | NPM管理（通过1Panel管理） |
+
+---
+
+## 六、安全检查清单
+
+### 6.1 已完成的安全措施
+
+- [x] 安装并配置 fail2ban
+- [x] 启用 UFW 防火墙
+- [x] 只开放必要端口（22、80、443）
+- [x] 所有服务通过 HTTPS 访问
+- [x] 真实IP通过 Cloudflare 隐藏
+- [x] 管理面板通过域名访问，不暴露端口
+- [x] OpenClaw 配置跨域访问白名单
+
+### 6.2 待完成的安全措施
+
+- [ ] 禁用SSH root登录
+- [ ] 配置SSH密钥认证
+- [ ] MySQL禁止远程root连接
+- [ ] Redis设置密码
+- [ ] 定期更新系统和软件
+
+---
+
+## 七、常见问题
+
+### Q1: fail2ban 误封了合法IP怎么办？
+
+```bash
+# 查看已封禁IP
+fail2ban-client status sshd
+
+# 解封指定IP
+fail2ban-client set sshd unbanip <IP地址>
+```
+
+### Q2: 如何查看防火墙规则？
+
+```bash
+ufw status verbose
+```
+
+### Q3: NPM代理的容器之间如何通信？
+
+NPM和OpenClaw都在 `1panel-network` 网络中，可以直接通过容器名或IP通信：
+- NPM: `172.18.0.3`
+- OpenClaw: `172.18.0.2`
+- 网关: `172.18.0.1`
+
+### Q4: 如何更新OpenClaw配置？
+
+```bash
+# 编辑配置文件
+vi /opt/1panel/apps/<app-name>/<app-name>/data/conf/openclaw.json
+
+# 重启容器
+cd /opt/1panel/apps/<app-name>/<app-name>
+docker compose restart openclaw
+```
+
+### Q5: Cloudflare API Token 用完后如何删除？
+
+访问 https://dash.cloudflare.com/profile/api-tokens ，找到对应Token点击删除。
+
+---
+
+## 八、信息脱敏说明
+
+本文档已做以下脱敏处理：
+
+| 原始内容 | 脱敏后 |
+|----------|--------|
+| 公网IP地址 | `<你的服务器IP>` |
+| 管理员用户名 | `<管理员>` |
+| 密码/Token | `<密码>` 或 `<API Token>` |
+| 服务器路径 | 保留通用路径 |
+| Docker容器名 | 保留通用名称 |
+
+**发布前检查命令：**
+```bash
+# 检查是否包含真实IP
+grep -oE '[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}' 文件.md | sort -u
+
+# 检查是否包含敏感信息
+grep -iE 'password|密码|token|secret' 文件.md
+```
+
+---
+
+*文档版本：2026-04-25*
+*环境：Ubuntu + Docker + 1Panel + NPM + Cloudflare*
+
+---
+
+## 九、问题排查与解决方案
+
+### 9.1 1Panel 安全入口问题
+
+**问题描述：**
+访问 1Panel 时显示 "Access Temporarily Unavailable"，无法进入登录页面。
+
+**原因分析：**
+1Panel 默认启用了安全入口（SecurityEntrance），必须通过特定路径 `/mypanel` 访问。
+
+**解决方案：**
+
+**方案一：禁用安全入口（推荐）**
+```bash
+# 修改数据库
+sqlite3 /opt/1panel/db/core.db "UPDATE settings SET value='' WHERE key='SecurityEntrance';"
+
+# 重启服务
+systemctl restart 1panel-core
+```
+
+**方案二：保留安全入口**
+在 NPM 中配置路径重写，将 `/` 重定向到 `/mypanel`。
+
+---
+
+### 9.2 NPM 无法代理到自身
+
+**问题描述：**
+创建 `npm.whalemalus.com` 代理主机，指向 NPM 自身的管理端口（30081），但访问时超时或无法连接。
+
+**原因分析：**
+NPM 无法代理到自身，会产生循环代理问题。NPM 容器内部的管理端口是 81，映射到主机的 30081。当 NPM 尝试代理到 `172.18.0.1:30081` 时，实际上是在请求自己，导致循环。
+
+**解决方案：**
+- **不创建 NPM 自身的代理**，直接通过 1Panel 管理 NPM
+- 或者使用其他反向代理（如 Caddy）来代理 NPM
+
+**删除错误的代理：**
+```bash
+TOKEN=*** -s -X POST http://localhost:30081/api/tokens 
+  -H "Content-Type: application/json" 
+  -d '{"identity":"<管理员邮箱>","secret": "***"}' | python3 -c "import sys,json; print(json.load(sys.stdin)['token'])")
+
+# 删除代理主机
+curl -s -X DELETE http://localhost:30081/api/nginx/proxy-hosts/<代理ID> 
+  -H "Authorization: Bearer *** 9.3 OpenClaw 跨域访问被拒绝
+
+**问题描述：**
+通过域名访问 OpenClaw Control UI 时，输入 Token 后无法连接，报错：
+```
+origin not allowed (open the Control UI from the gateway host or allow it in gateway.controlUi.allowedOrigins)
+```
+
+**原因分析：**
+OpenClaw 的 `gateway.controlUi.allowedOrigins` 默认只允许本地访问，不包含域名。
+
+**解决方案：**
+编辑配置文件，添加域名到白名单：
+```bash
+vi /opt/1panel/apps/<app-name>/data/conf/openclaw.json
+```
+
+修改 `gateway.controlUi.allowedOrigins`：
+```json
+{
+  "gateway": {
+    "controlUi": {
+      "allowedOrigins": [
+        "http://127.0.0.1:18789",
+        "http://<服务器IP>:18789",
+        "https://openclaw.<your-domain.com>"
+      ]
+    }
+  }
+}
+```
+
+重启容器：
+```bash
+cd /opt/1panel/apps/<app-name>
+docker compose restart openclaw
+```
+
+---
+
+### 9.4 SSH 暴力破解攻击
+
+**问题描述：**
+服务器 SSH 端口遭受大量暴力破解尝试，日志显示数千次失败登录。
+
+**解决方案：**
+安装并配置 fail2ban 自动封禁攻击IP（详见第一章）。
+
+**查看已封禁IP：**
+```bash
+fail2ban-client status sshd
+```
+
+**手动解封IP：**
+```bash
+fail2ban-client set sshd unbanip <IP地址>
+```
+
+---
+
+### 9.5 博客文章显示乱码
+
+**问题描述：**
+通过数据库直接插入的文章内容在博客前端显示为乱码。
+
+**原因分析：**
+MySQL 客户端连接编码不正确，中文字符被错误编码。
+
+**解决方案：**
+使用 Base64 编码插入数据：
+```bash
+# 将内容编码为 Base64
+CONTENT=$(cat article.md | base64 -w 0)
+
+# 使用 FROM_BASE64 解码插入
+docker exec dimstack-mysql mysql -uroot -p<密码> dim_stack -e 
+  "UPDATE article SET article_content = FROM_BASE64('$CONTENT') WHERE id = <文章ID>;"
+```
+
+---
+
+### 9.6 Docker 容器间网络不通
+
+**问题描述：**
+NPM 无法代理到其他容器（如 OpenClaw），显示 502 错误。
+
+**原因分析：**
+容器不在同一个 Docker 网络中，无法通过容器名或IP通信。
+
+**解决方案：**
+确保容器在同一个网络中：
+```bash
+# 查看容器网络
+docker inspect <容器名> --format '{{json .NetworkSettings.Networks}}'
+
+# 将容器加入网络
+docker network connect <网络名> <容器名>
+```
+
+---
+
+### 9.7 防火墙阻止 Docker 流量
+
+**问题描述：**
+启用 UFW 防火墙后，NPM 无法代理到主机上的服务（如 1Panel）。
+
+**原因分析：**
+Docker 容器访问主机端口时，流量被防火墙拦截。
+
+**解决方案：**
+添加规则允许 Docker 网络访问：
+```bash
+ufw allow from 172.18.0.0/16 to any port <端口号>
+```
+
+---
+
+### 9.8 Cloudflare Origin 证书不匹配
+
+**问题描述：**
+NPM 中上传 Cloudflare Origin 证书后，访问域名显示证书错误。
+
+**原因分析：**
+证书的域名列表不包含当前访问的域名。
+
+**解决方案：**
+1. 在 Cloudflare 控制台重新生成证书，确保包含所有需要的域名
+2. 域名列表应包括：`*.your-domain.com` 和 `your-domain.com`
+
+---
+
+### 9.9 1Panel 密码忘记
+
+**问题描述：**
+忘记 1Panel 登录密码。
+
+**解决方案：**
+```bash
+# 重置密码
+1pctl update password
+```
+
+按照提示输入新密码即可。
+
+---
+
+### 9.10 NPM 默认密码忘记
+
+**问题描述：**
+忘记 NPM 管理面板密码。
+
+**解决方案：**
+```bash
+# 重置 NPM 数据库中的密码
+docker exec <npm容器名> sqlite3 /data/database.sqlite 
+  "UPDATE auth SET password='$2a$10$xxxxx' WHERE id=1;"
+```
+
+或者删除 NPM 数据目录重新初始化：
+```bash
+cd /opt/1panel/apps/nginx-proxy-manager/nginx-proxy-manager
+rm -rf data/database.sqlite
+docker compose restart
+```
+
+---
+
+*更多问题排查请参考各章节的详细说明*
