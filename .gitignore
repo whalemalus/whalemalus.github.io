@@ -1,0 +1,17 @@
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+.jekyll-metadata
+.sass-cache
+_asset_bundler_cache
+_site
+codekit-config.json
+node_modules
+npm-debug.log*
+vendor/*
+
+_drafts
+trash
+.idea/
+
+_posts/2019-01-04-Visualize-Earth-and-Curve-with-Three.md

@@ -1,0 +1,184 @@
+# Site Settings - Whalemalus Tech Blog
+locale: "zh-CN"
+title: "Whalemalus 技术博客"
+title_separator: "|"
+name: "wyming"
+description: "AI Agent、DevOps、自动化迭代的技术实践与思考"
+url: "https://whalemalus.github.io"
+baseurl:
+repository: "whalemalus/whalemalus.github.io"
+teaser: "/images/bio-photo.jpg"
+words_per_minute: 300
+
+# Theme Settings
+remote_theme: "mmistakes/minimal-mistakes@4.26.2"
+minimal_mistakes_skin: "dark"
+
+# Comments (disable for now)
+comments:
+  provider: false
+
+# SEO Related
+google_site_verification:
+bing_site_verification:
+
+# Social Sharing
+twitter:
+  username:
+facebook:
+  username:
+
+# Open Graph
+og_image: "/images/site-logo.png"
+
+# Social Profiles
+social:
+  type: Person
+  name: "wyming"
+  links:
+    - "https://github.com/whalemalus"
+    - "https://whalemalus.com"
+
+# Analytics - Google AdSense
+analytics:
+  provider: "google-gtag"
+  google:
+    tracking_id: ""  # 需要用户填入 Google Analytics ID
+
+# Google AdSense
+google_adsense: "ca-pub-8756411190981477"
+
+# Site Author
+author:
+  name: "wyming"
+  avatar: "/images/bio-photo.jpg"
+  bio: "AI Agent 开发者，专注 DevOps 自动化与飞轮迭代"
+  location: "China"
+  email:
+  uri:
+  home:
+  github: "whalemalus"
+  twitter:
+  linkedin:
+  stackoverflow:
+
+# Reading Files
+include:
+  - .htaccess
+  - _pages
+exclude:
+  - "*.sublime-project"
+  - "*.sublime-workspace"
+  - vendor
+  - .asset-cache
+  - .bundle
+  - .jekyll-assets-cache
+  - .sass-cache
+  - assets/js/plugins
+  - assets/js/_main.js
+  - assets/js/vendor
+  - Capfile
+  - CHANGELOG
+  - config
+  - Gemfile
+  - Gruntfile.js
+  - gulpfile.js
+  - LICENSE
+  - log
+  - node_modules
+  - package.json
+  - Rakefile
+  - README
+  - tmp
+  - /docs
+  - /test
+keep_files:
+  - .git
+  - .svn
+encoding: "utf-8"
+markdown_ext: "markdown,mkdown,mkdn,mkd,md"
+
+# Conversion
+markdown: kramdown
+highlighter: rouge
+lsi: false
+excerpt_separator: "\n\n"
+incremental: false
+
+# Markdown Processing
+kramdown:
+  input: GFM
+  hard_wrap: false
+  auto_ids: true
+  footnote_nr: 1
+  entity_output: as_char
+  toc_levels: 1..6
+  smart_quotes: lsquo,rsquo,ldquo,rdquo
+  enable_coderay: false
+
+# Sass/SCSS
+sass:
+  sass_dir: _sass
+  style: compressed
+
+# Outputting
+permalink: /:year/:month/:day/:title/
+paginate: 10
+paginate_path: /page:num/
+timezone: Asia/Shanghai
+
+# Plugins
+plugins:
+  - jekyll-paginate
+  - jekyll-sitemap
+  - jekyll-gist
+  - jekyll-feed
+  - jemoji
+
+whitelist:
+  - jekyll-paginate
+  - jekyll-sitemap
+  - jekyll-gist
+  - jekyll-feed
+  - jemoji
+
+# Archives
+category_archive:
+  type: liquid
+  path: /categories/
+tag_archive:
+  type: liquid
+  path: /tags/
+
+# HTML Compression
+compress_html:
+  clippings: all
+  ignore:
+    envs: development
+
+# Defaults
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: post
+      author_profile: true
+      read_time: true
+      comments: false
+      share: true
+      related: true
+      toc: true
+      toc_label: "目录"
+  - scope:
+      path: ""
+      type: pages
+    values:
+      layout: single
+      author_profile: true
+
+# Collections
+collections:
+  portfolio:
+    output: true
+    permalink: /:collection/:name/

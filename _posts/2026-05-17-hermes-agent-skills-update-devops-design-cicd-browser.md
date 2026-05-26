@@ -1,0 +1,12 @@
+---
+layout: post
+title: "Hermes Agent 技能库更新：5 个新技能，覆盖 DevOps 全流程"
+date: 2026-05-17
+categories: Blog
+tags: []
+excerpt: "Hermes Agent 技能库本周新增 5 个高质量技能，涵盖 Docker 部署、Nginx 配置、安全审计等领域"
+image: "https://whalemalus.com/file/cover-hermes-skills-devops-key"
+original_url: "https://whalemalus.com/articles/hermes-agent-skills-update-devops-design-cicd-browser"
+---
+
+# Hermes Agent 技能库更新：5 个新技能，覆盖 DevOps、设计、CI/CD 与浏览器自动化\n\n> 2026-05-17 · Hermes Agent 团队\n\n**Hermes Agent 技能库本周新增 5 个高质量技能**，涵盖 Windows 脚本调试、UI/UX 设计系统、GitHub CI/CD 流水线、浏览器自动化等关键领域。这些技能来自真实的项目实践，经过多轮调试验证，具有极高的实战价值。\n\n## 新增技能一览\n\n### 1. Windows Batch Pitfalls — 9 大经典陷阱\n\n在真实项目中经过 8+ 轮调试总结出的 Windows `.bat` 脚本避坑指南。\n\n**核心问题：**\n- `%date%` / `%time%` 在重定向中的解析错误\n- 中文字符在 echo 中导致命令解析失败\n- `if` 块中括号和 `^` 续行符的意外行为\n- `start cmd /c` 嵌套引号的转义问题\n- PowerShell 7 下 `activate.bat` 失效\n\n**最佳实践：** bat + Python 混合架构 — bat 处理控制流，Python 处理文件 I/O 和复杂字符串操作。\n\n### 2. Awesome Design MD — 73 个设计系统参考\n\n收集了 73 个知名网站的 DESIGN.md 设计规范文件，覆盖 AI 平台、开发工具、金融科技、消费科技等领域。\n\n**包含品牌：** Claude、Linear、Vercel、Stripe、Cursor、Notion、Figma、Spotify、Airbnb 等。\n\n**用途：** AI Agent 在生成 UI 时，可以参考这些设计规范来匹配特定网站的视觉风格，实现像素级还原。\n\n### 3. UI/UX Pro Max — 设计智能指南\n\n一个全面的 UI/UX 设计知识库，包含：\n- **50+ 设计风格** — 从 Glassmorphism 到 Brutalism\n- **161 个调色板** — 按产品类型和行业分类\n- **57 种字体搭配** — 覆盖各种设计个性\n- **99 条 UX 准则** — 按优先级排序的检查清单\n- **25 种图表类型** — 数据可视化的最佳选择\n\n**特色功能：** 支持通过 CLI 工具按领域搜索，自动生成完整设计系统，支持 Master + Overrides 的层级模式。\n\n### 4. GitHub CI/CD Setup — 从零搭建流水线\n\n覆盖从基础 CI 到自动发布的完整四阶段方法论：\n\n1. **Phase 1: Basic CI** — lint + 单元测试\n2. **Phase 2: Build Validation** — 构建验证\n3. **Phase 3: Auto-Release** — Tag 触发自动发布\n4. **Phase 4: E2E** — 端到端测试（可选）\n\n**内置模板：** Python CI、JavaScript/Chrome Extension CI、Release 工作流。\n\n**常见坑位：** E2E 测试在 CI 中失败、模块级副作用未运行、Chrome Extension Manifest 验证、Release 权限配置等。\n\n### 5. PinchTab — AI Agent 的浏览器控制\n\nPinchTab 是一个独立的 HTTP 服务器，让 AI Agent 直接控制 Chrome 浏览器。\n\n**核心能力：**\n- 页面导航与内容提取\n- DOM 元素交互（点击、填表、滚动）\n- 截图与 PDF 导出\n- 多标签页管理\n- Chrome 扩展加载与测试\n\n**Token 效率优化：** 文本提取（~800 tokens）比截图（~10,000 tokens）便宜 13 倍，推荐优先使用文本模式。\n\n**特殊场景支持：** Gradio/Shadow DOM 组件的 JS Eval 操作、Element Plus/Ant Design 等 Vue 3 框架的 DOM 操作、Docker 容器间网络通信。\n\n## 技能设计理念\n\n这些技能都遵循相同的设计原则：\n\n1. **来自实战** — 每个技能都源于真实项目的调试经验\n2. **规则明确** — 用 "NEVER / FIXED" 模式清晰标注错误和正确做法\n3. **可操作** — 提供可直接复制的代码片段和命令\n4. **覆盖全面** — 从触发条件到常见陷阱，形成完整知识闭环\n\n## 总结\n\nHermes Agent 的技能库持续扩展，目前已覆盖 DevOps、前端设计、CI/CD、浏览器自动化、AI Agent 工具链等核心领域。每个技能都是团队在实际项目中反复验证的结晶，旨在让 AI Agent 能够更高效、更可靠地完成复杂任务。\n\n---\n\n*Hermes Agent Skills v1.0.0*\n*持续更新中*\n

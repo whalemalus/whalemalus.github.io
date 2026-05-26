@@ -1,0 +1,15 @@
+{% if site.google_adsense %}
+<!-- Google AdSense - 文章底部广告 -->
+<div class="ad-container" style="margin: 30px 0; text-align: center; padding: 20px 0; border-top: 1px solid #eee;">
+  <p style="font-size: 12px; color: #999; margin-bottom: 10px;">广告</p>
+  <ins class="adsbygoogle"
+       style="display:block"
+       data-ad-client="{{ site.google_adsense }}"
+       data-ad-slot="XXXXXXXXXX"
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
+  <script>
+       (adsbygoogle = window.adsbygoogle || []).push({});
+  </script>
+</div>
+{% endif %}
