@@ -6,6 +6,9 @@ categories: 技术教程
 tags: ["Docker", "MySQL", "容器化"]
 excerpt: "将 Dim Stack 博客系统通过 Docker Compose 部署到云服务器的完整过程，涵盖 Dockerfile 适配、MySQL 中文乱码修复、NPM 反向代理配置等关键环节。"
 image: "https://whalemalus.com/file/cover-dimstack-2024"
+header:
+  teaser: "https://whalemalus.com/file/cover-dimstack-2024"
+  overlay_image: "https://whalemalus.com/file/cover-dimstack-2024"
 original_url: "https://whalemalus.com/articles/dimstack-blog-deploy"
 ---
 

@@ -6,6 +6,9 @@ categories: DevOps
 tags: ["飞轮迭代", "Claude Code", "Bug 排查"]
 excerpt: "飞轮迭代引擎报告全部通过，但 Guard Agent 发现了权限被拒导致的静默降级、执行了错误任务、零测试结果、以及跑了6天的僵尸进程。"
 image: "https://whalemalus.com/file/cover-guard-agent-silent-failure-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-guard-agent-silent-failure-key"
+  overlay_image: "https://whalemalus.com/file/cover-guard-agent-silent-failure-key"
 original_url: "https://whalemalus.com/articles/guard-agent-catches-silent-failures"
 ---
 

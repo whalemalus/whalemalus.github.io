@@ -6,6 +6,9 @@ categories: DevOps
 tags: []
 excerpt: "2026-05-05，飞轮迭代引擎完成了 R64、R65、R66 三轮迭代，将书签系统从能看到升级到能搜索再到能关联。本文记录这次密集交付的过程与技术细节。"
 image: "https://whalemalus.com/file/cover-pagewise-bookmark-trilogy-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-pagewise-bookmark-trilogy-key"
+  overlay_image: "https://whalemalus.com/file/cover-pagewise-bookmark-trilogy-key"
 original_url: "https://whalemalus.com/articles/pagewise-bookmark-trilogy-r64-r65-r66"
 ---
 

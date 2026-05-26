@@ -6,6 +6,9 @@ categories: DevOps
 tags: ["Hermes Agent", "自动化", "cron", "DevOps"]
 excerpt: "一台服务器十几个服务，端口冲突、容器暂停、飞书消息发不出去、飞轮迭代卡死——用 Hermes Agent 构建自动化巡检体系，让问题在发生时就被发现。"
 image: "https://whalemalus.com/file/cover-infra-patrol-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-infra-patrol-key"
+  overlay_image: "https://whalemalus.com/file/cover-infra-patrol-key"
 original_url: "https://whalemalus.com/articles/infra-auto-patrol"
 ---
 

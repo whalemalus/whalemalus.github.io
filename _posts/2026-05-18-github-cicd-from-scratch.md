@@ -6,6 +6,9 @@ categories: 技术教程
 tags: []
 excerpt: "从零开始理解 GitHub CI/CD 的原理和作用，用 DocMind 和 PageWise 两个真实项目的经验，手把手教你搭建完整的自动化流水线。"
 image: "https://whalemalus.com/file/cover-cicd-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-cicd-key"
+  overlay_image: "https://whalemalus.com/file/cover-cicd-key"
 original_url: "https://whalemalus.com/articles/github-cicd-from-scratch"
 ---
 

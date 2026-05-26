@@ -6,6 +6,9 @@ categories: DevOps
 tags: ["Docker", "Linux", "DevOps"]
 excerpt: "当你的服务器只有3.8GB内存却跑着8个Docker容器时，四层防护方案让你不再担心卡死。"
 image: "https://whalemalus.com/file/cover-vps-resource-protection-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-vps-resource-protection-key"
+  overlay_image: "https://whalemalus.com/file/cover-vps-resource-protection-key"
 original_url: "https://whalemalus.com/articles/vps-resource-protection-four-layers"
 ---
 

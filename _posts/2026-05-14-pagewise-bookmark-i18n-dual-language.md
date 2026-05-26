@@ -6,6 +6,9 @@ categories: DevOps
 tags: ["PageWise", "Chrome Extension"]
 excerpt: "42个翻译键、11个文件外部化、3373个测试全绿——PageWise书签系统国际化迭代的完整复盘。"
 image: "https://whalemalus.com/file/cover-bookmark-i18n-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-bookmark-i18n-key"
+  overlay_image: "https://whalemalus.com/file/cover-bookmark-i18n-key"
 original_url: "https://whalemalus.com/articles/pagewise-bookmark-i18n-dual-language"
 ---
 

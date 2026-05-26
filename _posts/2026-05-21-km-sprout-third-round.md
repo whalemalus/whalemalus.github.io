@@ -6,6 +6,9 @@ categories: DevOps
 tags: ["知识库", "AI Agent", "LLM"]
 excerpt: "LLM Wiki 发芽报告第三轮 AgentMemory WeKnora 四方阵 Layer 0 架构 市场选择编译范式"
 image: "https://whalemalus.com/file/cover-km-sprout3-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-km-sprout3-key"
+  overlay_image: "https://whalemalus.com/file/cover-km-sprout3-key"
 original_url: "https://whalemalus.com/articles/km-sprout-third-round"
 ---
 

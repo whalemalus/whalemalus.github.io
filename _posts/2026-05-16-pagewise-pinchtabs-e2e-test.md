@@ -6,6 +6,9 @@ categories: DevOps
 tags: ["Chrome Extension", "E2E测试", "PinchTab", "PageWise"]
 excerpt: "Chrome Extension 的 E2E 测试一直是个难题，本文记录了使用 PinchTab 进行无浏览器自动化测试的完整实践。"
 image: "https://whalemalus.com/file/cover-pinchtabs-e2e-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-pinchtabs-e2e-key"
+  overlay_image: "https://whalemalus.com/file/cover-pinchtabs-e2e-key"
 original_url: "https://whalemalus.com/articles/pagewise-pinchtabs-e2e-test"
 ---
 

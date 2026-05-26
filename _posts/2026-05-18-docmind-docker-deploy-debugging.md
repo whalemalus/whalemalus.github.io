@@ -6,6 +6,9 @@ categories: DevOps
 tags: ["Docker", "Vue 3", "Bug 排查", "DevOps"]
 excerpt: "在将 DocMind 部署到 Docker 容器时，连续遭遇四个诡异 Bug——静态服务器不代理 API、容器认证不同步、LLM 网关 504、SSE 流式阻塞。本文记录排查过程和解法。"
 image: "https://whalemalus.com/file/cover-docmind-docker-debug-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-docmind-docker-debug-key"
+  overlay_image: "https://whalemalus.com/file/cover-docmind-docker-debug-key"
 original_url: "https://whalemalus.com/articles/docmind-docker-deploy-debugging"
 ---
 

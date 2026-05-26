@@ -6,6 +6,9 @@ categories: DevOps
 tags: []
 excerpt: "经过 92 轮飞轮迭代，PageWise 正式发布 v3.0.0 里程碑版本，覆盖智能集合、分享、分析等核心功能"
 image: "https://whalemalus.com/file/cover-pagewise-v3-release-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-pagewise-v3-release-key"
+  overlay_image: "https://whalemalus.com/file/cover-pagewise-v3-release-key"
 original_url: "https://whalemalus.com/articles/pagewise-v3-release-5857-tests-102-iterations"
 ---
 

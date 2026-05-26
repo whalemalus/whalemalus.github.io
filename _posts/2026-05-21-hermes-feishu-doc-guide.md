@@ -6,6 +6,9 @@ categories: 技术教程
 tags: []
 excerpt: "手把手教你让 AI 智能体通过飞书开放平台 API 读取、搜索、编辑飞书云文档。两种方案附完整踩坑记录。"
 image: "https://whalemalus.com/file/cover-hermes-feishu-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-hermes-feishu-key"
+  overlay_image: "https://whalemalus.com/file/cover-hermes-feishu-key"
 original_url: "https://whalemalus.com/articles/hermes-feishu-doc-guide"
 ---
 

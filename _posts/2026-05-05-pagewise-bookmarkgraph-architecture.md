@@ -6,6 +6,9 @@ categories: DevOps
 tags: []
 excerpt: "PageWise v2.2.0 引入 BookmarkGraph 书签知识图谱系统，通过主题聚类、标签自动生成、知识盲区检测、链接健康检查等 14 个模块，将散乱的书签变成可视化的知识网络。"
 image: "https://whalemalus.com/file/cover-bookmarkgraph-architecture-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-bookmarkgraph-architecture-key"
+  overlay_image: "https://whalemalus.com/file/cover-bookmarkgraph-architecture-key"
 original_url: "https://whalemalus.com/articles/pagewise-bookmarkgraph-architecture"
 ---
 

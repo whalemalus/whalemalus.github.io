@@ -6,6 +6,9 @@ categories: DevOps
 tags: []
 excerpt: "从「保存链接」到「智能学习伙伴」—— 12 轮飞轮迭代，10 个新功能，构建完整的智能学习生态系统"
 image: "https://whalemalus.com/file/cover-pagewise-bookmark-sprint-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-pagewise-bookmark-sprint-key"
+  overlay_image: "https://whalemalus.com/file/cover-pagewise-bookmark-sprint-key"
 original_url: "https://whalemalus.com/articles/pagewise-bookmark-intelligence-sprint"
 ---
 

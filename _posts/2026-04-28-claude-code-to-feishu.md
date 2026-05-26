@@ -6,6 +6,9 @@ categories: 技术教程
 tags: ["飞书", "WebSocket"]
 excerpt: "Claude Code 在终端里跑得很好，但团队协作时总不能每个人都 SSH 到服务器。用一个 Python 文件 + WebSocket，把 Claude Code 桥接到飞书。"
 image: "https://whalemalus.com/file/cover-claude-feishu-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-claude-feishu-key"
+  overlay_image: "https://whalemalus.com/file/cover-claude-feishu-key"
 original_url: "https://whalemalus.com/articles/claude-code-to-feishu"
 ---
 

@@ -6,6 +6,9 @@ categories: DevOps
 tags: ["Chrome Extension", "安全", "飞轮迭代", "PageWise"]
 excerpt: "PageWise 书签模块用一天跑通三轮迭代——存储预处理、安全审计、性能基准测试，完成 Chrome Web Store 上架前的最后冲刺。"
 image: "https://whalemalus.com/file/cover-chrome-web-store-prep-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-chrome-web-store-prep-key"
+  overlay_image: "https://whalemalus.com/file/cover-chrome-web-store-prep-key"
 original_url: "https://whalemalus.com/articles/chrome-web-store-prep"
 ---
 

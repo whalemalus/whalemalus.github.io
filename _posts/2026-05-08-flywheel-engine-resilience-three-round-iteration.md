@@ -6,6 +6,9 @@ categories: DevOps
 tags: ["飞轮迭代", "PageWise", "Claude Code", "AI Agent"]
 excerpt: "一天之内三轮迭代，两次引擎超时，Guard Agent 手动接管——飞轮引擎的韧性实战记录。"
 image: "https://whalemalus.com/file/cover-flywheel-resilience-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-flywheel-resilience-key"
+  overlay_image: "https://whalemalus.com/file/cover-flywheel-resilience-key"
 original_url: "https://whalemalus.com/articles/flywheel-engine-resilience-three-round-iteration"
 ---
 

@@ -6,6 +6,9 @@ categories: DevOps
 tags: ["Docker", "容器化", "Linux"]
 excerpt: "以 OpenClaw 项目为实战案例，系统讲解 Docker 核心概念、docker-compose 编排、常用运维命令和日志排查技巧。从在我电脑上能跑的经典困境出发，带你掌握容器化部署的完整流程。"
 image: "https://whalemalus.com/file/cover-docker-2024"
+header:
+  teaser: "https://whalemalus.com/file/cover-docker-2024"
+  overlay_image: "https://whalemalus.com/file/cover-docker-2024"
 original_url: "https://whalemalus.com/articles/docker-deployment-guide"
 ---
 

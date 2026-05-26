@@ -6,6 +6,9 @@ categories: DevOps
 tags: ["AI Agent", "飞轮迭代", "自动化"]
 excerpt: "飞轮守护者巡检系统连续4天检测到同一个CI失败问题，每次都准确诊断出根因，但每次都没能完成修复。本文复盘这个反模式，提出pending_fixes缓存机制。"
 image: "https://whalemalus.com/file/cover-diagnosis-not-repair-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-diagnosis-not-repair-key"
+  overlay_image: "https://whalemalus.com/file/cover-diagnosis-not-repair-key"
 original_url: "https://whalemalus.com/articles/diagnosis-not-repair-anti-pattern"
 ---
 

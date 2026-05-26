@@ -6,6 +6,9 @@ categories: 技术教程
 tags: ["DocMind", "Gradio", "Claude Code", "JavaScript"]
 excerpt: "DocMind 的导航按钮点击无反应、页面切换卡死——根因是 JS IIFE 包装缺少分号和 CSS 路径 404 两个隐秘 Bug。"
 image: "https://whalemalus.com/file/cover-docmind-iife-css-fix-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-docmind-iife-css-fix-key"
+  overlay_image: "https://whalemalus.com/file/cover-docmind-iife-css-fix-key"
 original_url: "https://whalemalus.com/articles/docmind-page-switching-iife-css-fix"
 ---
 

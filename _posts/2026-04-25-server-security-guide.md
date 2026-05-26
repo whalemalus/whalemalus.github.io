@@ -6,6 +6,9 @@ categories: 服务器安全
 tags: ["安全", "Linux", "Nginx"]
 excerpt: "从裸奔到武装到牙齿的服务器安全加固实战。包括 fail2ban 防暴力破解、UFW 防火墙配置、端口收敛和反向代理跨域问题修复。"
 image: "https://whalemalus.com/file/cover-security-2024"
+header:
+  teaser: "https://whalemalus.com/file/cover-security-2024"
+  overlay_image: "https://whalemalus.com/file/cover-security-2024"
 original_url: "https://whalemalus.com/articles/server-security-guide"
 ---
 

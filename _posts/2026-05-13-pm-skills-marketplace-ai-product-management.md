@@ -6,6 +6,9 @@ categories: 技术教程
 tags: []
 excerpt: "Paweł Huryn 构建的 PM Skills Marketplace，把 Teresa Torres、Marty Cagan 等顶级产品专家的方法论编码成了 65 个 AI 技能和 36 条链式工作流。本文深度解析 8 大模块及如何融入 AI 驱动的开发流程。"
 image: "https://whalemalus.com/file/339406eb56644e69"
+header:
+  teaser: "https://whalemalus.com/file/339406eb56644e69"
+  overlay_image: "https://whalemalus.com/file/339406eb56644e69"
 original_url: "https://whalemalus.com/articles/pm-skills-marketplace-ai-product-management"
 ---
 

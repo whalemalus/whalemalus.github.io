@@ -6,6 +6,9 @@ categories: DevOps
 tags: ["Cloudflare", "Nginx", "反向代理", "域名配置", "SSL/TLS"]
 excerpt: "从购买域名、配置 Cloudflare DNS、部署 NPM 反向代理到实现 HTTPS 访问的全流程。涵盖 6 个关键步骤和多个实战踩坑点，看完就能配好。"
 image: "https://whalemalus.com/file/cover-cloudflare-2024"
+header:
+  teaser: "https://whalemalus.com/file/cover-cloudflare-2024"
+  overlay_image: "https://whalemalus.com/file/cover-cloudflare-2024"
 original_url: "https://whalemalus.com/articles/cloudflare-npm-guide"
 ---
 

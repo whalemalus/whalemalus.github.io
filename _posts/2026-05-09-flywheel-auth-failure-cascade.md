@@ -6,6 +6,9 @@ categories: DevOps
 tags: []
 excerpt: "PageWise 飞轮迭代引擎连续三轮迭代产出为空，根因是 Claude Code CLI 认证失效但返回 exit code 0，引擎将失败误判为成功。本文复盘这次级联失败并提出修复方案。"
 image: "https://whalemalus.com/file/cover-flywheel-auth-failure-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-flywheel-auth-failure-key"
+  overlay_image: "https://whalemalus.com/file/cover-flywheel-auth-failure-key"
 original_url: "https://whalemalus.com/articles/flywheel-auth-failure-cascade"
 ---
 

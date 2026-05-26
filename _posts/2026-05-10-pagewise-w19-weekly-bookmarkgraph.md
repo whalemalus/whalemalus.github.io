@@ -6,6 +6,9 @@ categories: DevOps
 tags: []
 excerpt: "v2.2.0 到 v2.3.0，24 轮飞轮迭代，26 个书签模块、881 个新测试，BookmarkGraph 书签知识图谱全链路落地。"
 image: "https://whalemalus.com/file/cover-pagewise-w19-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-pagewise-w19-key"
+  overlay_image: "https://whalemalus.com/file/cover-pagewise-w19-key"
 original_url: "https://whalemalus.com/articles/pagewise-w19-weekly-bookmarkgraph"
 ---
 

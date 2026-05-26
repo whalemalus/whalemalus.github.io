@@ -6,6 +6,9 @@ categories: 技术教程
 tags: ["知识管理", "LLM Wiki", "LLM"]
 excerpt: "从哈耶克的分散知识理论到Graphiti的时序知识图谱，探索LLM Wiki的理论基础与实践困境。"
 image: "https://whalemalus.com/file/cover-knowledge-mgmt-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-knowledge-mgmt-key"
+  overlay_image: "https://whalemalus.com/file/cover-knowledge-mgmt-key"
 original_url: "https://whalemalus.com/articles/knowledge-management-trilogy"
 ---
 

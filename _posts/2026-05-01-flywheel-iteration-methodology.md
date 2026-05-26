@@ -6,6 +6,9 @@ categories: DevOps
 tags: []
 excerpt: "飞轮迭代是一种让 AI Agent 持续改进项目的工程方法，每个迭代形成需求-设计-测试-编码-审查-文档的闭环。"
 image: "https://whalemalus.com/file/cover-flywheel-iteration-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-flywheel-iteration-key"
+  overlay_image: "https://whalemalus.com/file/cover-flywheel-iteration-key"
 original_url: "https://whalemalus.com/articles/flywheel-iteration-methodology"
 ---
 

@@ -6,6 +6,9 @@ categories: DevOps
 tags: []
 excerpt: "知识管理和自动化迭代的碰撞：Ingest=Iteration、Lint=Guard Agent、Synthesis=发芽。LLM Wiki 发芽系统自动生成的第二篇知识碰撞报告。"
 image: "https://whalemalus.com/file/cover-sprout-automation-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-sprout-automation-key"
+  overlay_image: "https://whalemalus.com/file/cover-sprout-automation-key"
 original_url: "https://whalemalus.com/articles/sprout-automation-meets-flywheel"
 ---
 

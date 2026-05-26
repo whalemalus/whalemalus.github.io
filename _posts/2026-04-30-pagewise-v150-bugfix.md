@@ -6,6 +6,9 @@ categories: DevOps
 tags: ["Chrome Extension", "Bug 排查"]
 excerpt: "PageWise v1.5.0 发布时发现 zip 安装包缺失，同时定位了三个影响用户体验的 Bug：页面切换后内容提取失败、AI 消息操作按钮布局错位、学习路径生成超时。"
 image: "https://whalemalus.com/file/cover-pagewise-v150-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-pagewise-v150-key"
+  overlay_image: "https://whalemalus.com/file/cover-pagewise-v150-key"
 original_url: "https://whalemalus.com/articles/pagewise-v150-bugfix"
 ---
 

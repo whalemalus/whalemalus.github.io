@@ -6,6 +6,9 @@ categories: DevOps
 tags: ["Chrome Extension", "Claude Code", "飞轮迭代", "AI Agent"]
 excerpt: "PageWise 在第 42 轮飞轮迭代中完成了 Skill Engine 的端到端测试，发现 saveSkill() 故意不持久化参数字段这一设计决策。同时完成了 W18 周度复盘，项目测试覆盖率达到 1.44:1 的测试/代码比。"
 image: "https://whalemalus.com/file/cover-skill-engine-e2e-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-skill-engine-e2e-key"
+  overlay_image: "https://whalemalus.com/file/cover-skill-engine-e2e-key"
 original_url: "https://whalemalus.com/articles/pagewise-skill-engine-e2e-r42"
 ---
 

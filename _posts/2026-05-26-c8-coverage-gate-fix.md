@@ -6,6 +6,9 @@ categories: DevOps
 tags: ["Bug 排查", "JavaScript", "测试覆盖率", "c8"]
 excerpt: "PageWise 项目覆盖率门禁报 24%，实际被测试代码覆盖率高达 75%。问题出在 c8 配置中的 all:true，把 171 个从未被导入的模块也计入了分母。"
 image: "https://whalemalus.com/file/cover-c8-coverage-gate-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-c8-coverage-gate-key"
+  overlay_image: "https://whalemalus.com/file/cover-c8-coverage-gate-key"
 original_url: "https://whalemalus.com/articles/c8-coverage-gate-fix"
 ---
 

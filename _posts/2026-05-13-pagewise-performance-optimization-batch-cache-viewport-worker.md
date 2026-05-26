@@ -6,6 +6,9 @@ categories: DevOps
 tags: ["PageWise", "JavaScript", "Chrome Extension", "性能优化"]
 excerpt: "当书签数量突破万级，图谱构建、相似度计算、视口渲染都会成为性能瓶颈。R78 迭代引入批处理引擎、LRU 缓存、视口裁剪和 Worker 卸载四大优化策略。"
 image: "https://whalemalus.com/file/cover-performance-optimization-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-performance-optimization-key"
+  overlay_image: "https://whalemalus.com/file/cover-performance-optimization-key"
 original_url: "https://whalemalus.com/articles/pagewise-performance-optimization-batch-cache-viewport-worker"
 ---
 

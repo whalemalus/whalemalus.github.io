@@ -6,6 +6,9 @@ categories: DevOps
 tags: ["飞轮迭代", "Claude Code", "自动化"]
 excerpt: "飞轮守护者是一个自动化巡检系统，定时检查多个 AI 项目的健康状态，自动修复 TODO 耗尽、CI 失败等问题，并触发飞轮迭代。"
 image: "https://whalemalus.com/file/cover-flywheel-guardian-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-flywheel-guardian-key"
+  overlay_image: "https://whalemalus.com/file/cover-flywheel-guardian-key"
 original_url: "https://whalemalus.com/articles/flywheel-guardian-ai-agent-self-patrol"
 ---
 

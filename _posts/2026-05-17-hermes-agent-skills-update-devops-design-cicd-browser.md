@@ -6,6 +6,9 @@ categories: DevOps
 tags: []
 excerpt: "Hermes Agent 技能库本周新增 5 个高质量技能，涵盖 Docker 部署、Nginx 配置、安全审计等领域"
 image: "https://whalemalus.com/file/cover-hermes-skills-devops-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-hermes-skills-devops-key"
+  overlay_image: "https://whalemalus.com/file/cover-hermes-skills-devops-key"
 original_url: "https://whalemalus.com/articles/hermes-agent-skills-update-devops-design-cicd-browser"
 ---
 

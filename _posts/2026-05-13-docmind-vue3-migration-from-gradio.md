@@ -6,6 +6,9 @@ categories: 技术教程
 tags: ["Vue 3", "Claude Code", "Docker", "DocMind"]
 excerpt: "DocMind 的 Gradio 前端在交互体验上触到天花板后，用一天时间完成了向 Vue 3 + Element Plus 的全量迁移——10 个页面、37 个 API 端点、并行 Claude Code 流水线。"
 image: "https://whalemalus.com/file/cover-docmind-vue3-migration-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-docmind-vue3-migration-key"
+  overlay_image: "https://whalemalus.com/file/cover-docmind-vue3-migration-key"
 original_url: "https://whalemalus.com/articles/docmind-vue3-migration-from-gradio"
 ---
 

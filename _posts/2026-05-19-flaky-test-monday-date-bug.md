@@ -6,6 +6,9 @@ categories: DevOps
 tags: ["飞轮迭代", "Chrome Extension", "Claude Code"]
 excerpt: "PageWise 的 getWeeklyStats 测试在周一突然全红，根因是测试代码用 Date.now() - N天 构造时间戳，但生产代码以周一 00:00:00 作为一周起点。"
 image: "https://whalemalus.com/file/cover-flaky-test-monday-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-flaky-test-monday-key"
+  overlay_image: "https://whalemalus.com/file/cover-flaky-test-monday-key"
 original_url: "https://whalemalus.com/articles/flaky-test-monday-date-bug"
 ---
 

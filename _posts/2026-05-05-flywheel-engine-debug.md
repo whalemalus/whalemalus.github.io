@@ -6,6 +6,9 @@ categories: DevOps
 tags: ["飞轮迭代", "Claude Code", "Bug 排查"]
 excerpt: "PageWise 飞轮迭代引擎连续两次运行失败——API 密钥占位符未替换、语法错误导致 Claude Code 调用静默失败，引擎却报告成功。"
 image: "https://whalemalus.com/file/cover-flywheel-engine-debug-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-flywheel-engine-debug-key"
+  overlay_image: "https://whalemalus.com/file/cover-flywheel-engine-debug-key"
 original_url: "https://whalemalus.com/articles/flywheel-engine-debug"
 ---
 

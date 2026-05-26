@@ -6,6 +6,9 @@ categories: 技术教程
 tags: ["OpenClaw", "飞书", "AI 网关"]
 excerpt: "通过 OpenClaw 接入飞书后看不到 AI 的思考过程？排查发现是 4 个配置项缺失。本文记录完整的排查过程和配置方法。"
 image: "https://whalemalus.com/file/cover-openclaw-streaming-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-openclaw-streaming-key"
+  overlay_image: "https://whalemalus.com/file/cover-openclaw-streaming-key"
 original_url: "https://whalemalus.com/articles/openclaw-feishu-streaming-config"
 ---
 

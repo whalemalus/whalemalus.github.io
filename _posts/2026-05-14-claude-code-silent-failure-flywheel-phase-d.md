@@ -6,6 +6,9 @@ categories: DevOps
 tags: ["Claude Code", "飞轮迭代", "PageWise", "DocMind"]
 excerpt: "PageWise 飞轮迭代引擎完成 Phase D 最后三轮，Claude Code 对复杂任务的静默失败成为新的信任危机。"
 image: "https://whalemalus.com/file/cover-flywheel-phase-d-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-flywheel-phase-d-key"
+  overlay_image: "https://whalemalus.com/file/cover-flywheel-phase-d-key"
 original_url: "https://whalemalus.com/articles/claude-code-silent-failure-flywheel-phase-d"
 ---
 

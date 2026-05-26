@@ -6,6 +6,9 @@ categories: DevOps
 tags: []
 excerpt: "PageWise 迎来重要质量节点：4,415 个测试用例全部通过，113 个功能模块覆盖书签、AI、对话、知识图谱等核心功能。"
 image: "https://whalemalus.com/file/cover-pagewise-quality-milestone-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-pagewise-quality-milestone-key"
+  overlay_image: "https://whalemalus.com/file/cover-pagewise-quality-milestone-key"
 original_url: "https://whalemalus.com/articles/pagewise-4415-tests-113-modules-quality-milestone"
 ---
 

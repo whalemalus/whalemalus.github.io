@@ -6,6 +6,9 @@ categories: DevOps
 tags: ["AI Agent", "自动化", "DevOps"]
 excerpt: "技能触发（主动）、记忆提醒（被动）、Cron 兜底（自动检测），让规则从建议变成强制执行。结合注册表管理实战案例，展示如何让自动化系统真正可靠。"
 image: "https://whalemalus.com/file/cover-safety-net-2026"
+header:
+  teaser: "https://whalemalus.com/file/cover-safety-net-2026"
+  overlay_image: "https://whalemalus.com/file/cover-safety-net-2026"
 original_url: "https://whalemalus.com/articles/three-layer-safety-net"
 ---
 

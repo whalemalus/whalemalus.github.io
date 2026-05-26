@@ -6,6 +6,9 @@ categories: 技术教程
 tags: ["DocMind", "Bug 排查", "Windows"]
 excerpt: "DocMind 的 Windows 一键启动脚本 start.bat 在中文 Windows 环境下连续崩溃 8 次，从嵌套引号到 PowerShell 编码，每次都是不同的坑。最终通过 Python 辅助脚本解决了所有问题。"
 image: "https://whalemalus.com/file/cover-windows-bat-debugging-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-windows-bat-debugging-key"
+  overlay_image: "https://whalemalus.com/file/cover-windows-bat-debugging-key"
 original_url: "https://whalemalus.com/articles/windows-bat-debugging-eight-falls"
 ---
 

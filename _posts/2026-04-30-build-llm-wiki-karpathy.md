@@ -6,6 +6,9 @@ categories: 技术教程
 tags: ["LLM", "知识库", "AI Agent"]
 excerpt: "不用向量数据库，不用 RAG，只用 Markdown 文件和 LLM，就能构建一个不断积累的个人知识库。本文记录了从概念理解到本地部署的完整过程。"
 image: "https://whalemalus.com/file/cover-llm-wiki-2026"
+header:
+  teaser: "https://whalemalus.com/file/cover-llm-wiki-2026"
+  overlay_image: "https://whalemalus.com/file/cover-llm-wiki-2026"
 original_url: "https://whalemalus.com/articles/build-llm-wiki-karpathy"
 ---
 

@@ -6,6 +6,9 @@ categories: 技术教程
 tags: []
 excerpt: "当 AI 帮你写前端代码时，它真的懂设计吗？深度解析包含 67 种 UI 风格、161 个行业配色方案和 161 条推理规则的 AI 设计智能系统，以及 DocMind 项目 8 个专业级 UI/UX 优化的实战经验。"
 image: "https://whalemalus.com/file/fc0691ed54924cc1"
+header:
+  teaser: "https://whalemalus.com/file/fc0691ed54924cc1"
+  overlay_image: "https://whalemalus.com/file/fc0691ed54924cc1"
 original_url: "https://whalemalus.com/articles/ui-ux-pro-max-ai-design-intelligence"
 ---
 

@@ -6,6 +6,9 @@ categories: DevOps
 tags: ["PageWise", "飞轮迭代", "E2E测试", "Chrome Extension"]
 excerpt: "PageWise W18 完成 42 轮飞轮迭代、157 次提交、2111 测试全通过，v2.0.0 完整发布，LLM Wiki 三层架构全部实现。"
 image: "https://whalemalus.com/file/cover-pagewise-w18-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-pagewise-w18-key"
+  overlay_image: "https://whalemalus.com/file/cover-pagewise-w18-key"
 original_url: "https://whalemalus.com/articles/pagewise-w18-weekly-v2"
 ---
 

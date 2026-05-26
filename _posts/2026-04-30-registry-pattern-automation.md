@@ -6,6 +6,9 @@ categories: DevOps
 tags: ["DevOps", "自动化", "AI Agent"]
 excerpt: "通过维护一个配置文件作为唯一数据源，让 cron 任务不再硬编码路径和目标。结合 GitHub 仓库同步和博客文章发布的实践，展示注册表模式如何让自动化运维变得清爽。"
 image: "https://whalemalus.com/file/cover-registry-2026"
+header:
+  teaser: "https://whalemalus.com/file/cover-registry-2026"
+  overlay_image: "https://whalemalus.com/file/cover-registry-2026"
 original_url: "https://whalemalus.com/articles/registry-pattern-automation"
 ---
 

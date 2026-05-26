@@ -6,6 +6,9 @@ categories: DevOps
 tags: ["Claude Code", "AI Agent"]
 excerpt: "Claude Code 调用耗时异常，原以为是 API 网关延迟，排查后发现是文件权限问题。修复后 10 轮飞轮迭代，测试从 537 增长到 663 个。"
 image: "https://whalemalus.com/file/cover-cc-troubleshoot-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-cc-troubleshoot-key"
+  overlay_image: "https://whalemalus.com/file/cover-cc-troubleshoot-key"
 original_url: "https://whalemalus.com/articles/claude-code-troubleshooting"
 ---
 

@@ -6,6 +6,9 @@ categories: DevOps
 tags: ["PageWise", "Chrome Extension", "飞轮迭代", "AI Agent"]
 excerpt: "一天三次飞轮迭代，从学习追踪到智能推荐再到数据洞察，书签知识体系闭环成型。R67 学习进度追踪、R68 AI 智能推荐、R69 统计仪表盘，共 2709 行代码、82 个测试。"
 image: "https://whalemalus.com/file/cover-bookmark-trilogy-r67-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-bookmark-trilogy-r67-key"
+  overlay_image: "https://whalemalus.com/file/cover-bookmark-trilogy-r67-key"
 original_url: "https://whalemalus.com/articles/pagewise-bookmark-knowledge-trilogy-r67-r68-r69"
 ---
 

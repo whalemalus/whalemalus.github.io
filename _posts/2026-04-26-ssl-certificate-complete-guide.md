@@ -6,6 +6,9 @@ categories: 技术教程
 tags: ["SSL/TLS", "安全", "Cloudflare"]
 excerpt: "从零开始，循序渐进理解网络安全通信的核心概念。以 whalemalus.com 博客系统为例，讲解证书、PKI、数字签名、RSA 算法的原理与实战。"
 image: "https://whalemalus.com/file/cover-ssl-cert-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-ssl-cert-key"
+  overlay_image: "https://whalemalus.com/file/cover-ssl-cert-key"
 original_url: "https://whalemalus.com/articles/ssl-certificate-complete-guide"
 ---
 

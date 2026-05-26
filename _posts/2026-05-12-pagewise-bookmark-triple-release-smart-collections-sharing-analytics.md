@@ -6,6 +6,9 @@ categories: DevOps
 tags: []
 excerpt: "一天三个迭代轮次，100+ 测试用例，PageWise 书签管理功能全面升级：智能集合自动归类、隐私优先的分享机制、高级分析规划。"
 image: "https://whalemalus.com/file/cover-pagewise-bookmark-triple-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-pagewise-bookmark-triple-key"
+  overlay_image: "https://whalemalus.com/file/cover-pagewise-bookmark-triple-key"
 original_url: "https://whalemalus.com/articles/pagewise-bookmark-triple-release-smart-collections-sharing-analytics"
 ---
 

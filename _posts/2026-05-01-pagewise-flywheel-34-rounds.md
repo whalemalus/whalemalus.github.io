@@ -6,6 +6,9 @@ categories: DevOps
 tags: ["Chrome Extension", "自动化", "Claude Code", "飞轮迭代", "AI Agent"]
 excerpt: "PageWise 在一天内通过自动化飞轮引擎完成 34 轮迭代，构建了完整的 LLM Wiki 知识编译系统，同时修复了 v2.1.0 的 3 个关键 Bug。"
 image: "https://whalemalus.com/file/cover-pagewise-flywheel-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-pagewise-flywheel-key"
+  overlay_image: "https://whalemalus.com/file/cover-pagewise-flywheel-key"
 original_url: "https://whalemalus.com/articles/pagewise-flywheel-34-rounds"
 ---
 

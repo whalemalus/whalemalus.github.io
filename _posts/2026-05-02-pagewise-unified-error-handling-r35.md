@@ -6,6 +6,9 @@ categories: DevOps
 tags: []
 excerpt: "一个 Chrome 扩展如何从 31 处散乱的 try-catch 进化到统一的错误分类体系，顺便为 Chrome Web Store 上架清除了国际化障碍。"
 image: "https://whalemalus.com/file/cover-error-handling-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-error-handling-key"
+  overlay_image: "https://whalemalus.com/file/cover-error-handling-key"
 original_url: "https://whalemalus.com/articles/pagewise-unified-error-handling-r35"
 ---
 

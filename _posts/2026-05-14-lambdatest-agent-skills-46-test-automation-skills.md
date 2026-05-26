@@ -6,6 +6,9 @@ categories: DevOps
 tags: ["AI Agent", "自动化"]
 excerpt: "LambdaTest开源的agent-skills项目，教你的AI助手成为高级QA自动化架构师。覆盖46个测试框架、15+编程语言、支持Claude Code/Copilot/Cursor等主流AI工具。"
 image: "https://whalemalus.com/file/cover-lambdatest-skills-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-lambdatest-skills-key"
+  overlay_image: "https://whalemalus.com/file/cover-lambdatest-skills-key"
 original_url: "https://whalemalus.com/articles/lambdatest-agent-skills-46-test-automation-skills"
 ---
 

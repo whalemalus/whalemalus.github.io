@@ -6,6 +6,9 @@ categories: DevOps
 tags: ["飞轮迭代", "Docker", "Vue.js", "自动化", "Claude Code"]
 excerpt: "2026年5月15日四场技术实战：DocMind删掉39500行Gradio代码迁移到Vue3，PageWise飞轮引擎连续三轮产出为零，Hermes Agent接入7引擎元搜索，以及磁盘100%满导致MySQL崩溃的紧急抢修。"
 image: "https://whalemalus.com/file/cover-four-battles-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-four-battles-key"
+  overlay_image: "https://whalemalus.com/file/cover-four-battles-key"
 original_url: "https://whalemalus.com/articles/four-battles-automation-day"
 ---
 

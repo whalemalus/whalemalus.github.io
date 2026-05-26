@@ -6,6 +6,9 @@ categories: DevOps
 tags: ["cron", "自动化", "Linux", "安全"]
 excerpt: "从零开始讲解 Linux cron 定时任务，从基础语法到实战案例——用 cron 自动监控 GitHub Issue 的开发者回复，并将结果推送到即时通讯工具。"
 image: "https://whalemalus.com/file/cover-cron-2026"
+header:
+  teaser: "https://whalemalus.com/file/cover-cron-2026"
+  overlay_image: "https://whalemalus.com/file/cover-cron-2026"
 original_url: "https://whalemalus.com/articles/linux-cron-github-monitor"
 ---
 

@@ -6,6 +6,9 @@ categories: 技术教程
 tags: ["Claude Code", "AI Agent", "Gradio"]
 excerpt: "DocMind 的 AI 模型配置一直藏在 JSON 文件里，本文记录了如何用 Claude Code 在一个晚上内把配置文件变成一个完整的 Gradio 设置页面。"
 image: "https://whalemalus.com/file/cover-docmind-settings-gui-key"
+header:
+  teaser: "https://whalemalus.com/file/cover-docmind-settings-gui-key"
+  overlay_image: "https://whalemalus.com/file/cover-docmind-settings-gui-key"
 original_url: "https://whalemalus.com/articles/docmind-settings-gui-claude-code"
 ---
 
