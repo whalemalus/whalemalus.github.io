@@ -1,9 +1,44 @@
 ---
 layout: home
-author_profile: true
-header:
-  overlay_color: "#5e616c"
-  overlay_image: "images/homepage-banner-1.jpg"
-  caption:
-excerpt: "All I'm saying is inside, I had the element of surprise."
 ---
+
+<section class="home-hero">
+  <h1 class="home-hero__title">WHALEMALUS</h1>
+  <p class="home-hero__subtitle">AI Agent · DevOps · 自动化迭代</p>
+  <p class="home-hero__intro">
+    AI Agent 开发者，专注 DevOps 自动化与飞轮迭代方法论。记录技术实践、架构思考与自动化工具链的探索过程。
+  </p>
+</section>
+
+<section class="home-stats">
+  <div class="home-stats__item">
+    <span class="home-stats__number">{{ site.posts.size }}</span>
+    <span class="home-stats__label">Posts</span>
+  </div>
+  <div class="home-stats__item">
+    <span class="home-stats__number">{{ site.categories.size }}</span>
+    <span class="home-stats__label">Categories</span>
+  </div>
+  <div class="home-stats__item">
+    <span class="home-stats__number">{{ site.tags.size }}</span>
+    <span class="home-stats__label">Tags</span>
+  </div>
+</section>
+
+<section class="home-posts">
+  <h2 class="home-posts__heading">Latest Posts</h2>
+  <ul class="home-posts__list">
+    {% for post in site.posts limit:10 %}
+    <li class="home-posts__item">
+      <span class="home-posts__date">{{ post.date | date: "%Y-%m-%d" }}</span>
+      <a class="home-posts__link" href="{{ post.url | relative_url }}">{{ post.title }}</a>
+      {% if post.categories.size > 0 %}
+      <span class="home-posts__category">{{ post.categories.first }}</span>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  <p class="home-posts__more">
+    <a href="{{ '/posts' | relative_url }}">查看全部文章 →</a>
+  </p>
+</section>

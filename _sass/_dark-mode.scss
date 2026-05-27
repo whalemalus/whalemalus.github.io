@@ -1,0 +1,37 @@
+/* ============================================
+   _dark-mode.scss — Dark mode overrides
+   ============================================ */
+
+body.dark-mode {
+  --bg: #111111;
+  --bg-surface: #1a1a1a;
+  --text-primary: #e0e0e0;
+  --text-muted: #a0a0a0;
+  --text-muted-light: #6a6a6a;
+  --accent: #5b7aff;
+  --accent-hover: #7b94ff;
+  --border: rgba(224, 224, 224, 0.12);
+  --border-strong: rgba(224, 224, 224, 0.25);
+  --code-bg: #1a1a1a;
+  --header-bg: rgba(17, 17, 17, 0.92);
+}
+
+body.dark-mode img {
+  opacity: 0.9;
+}
+
+body.dark-mode .home-stats {
+  background: var(--bg-surface);
+}
+
+body.dark-mode code {
+  border-color: var(--border);
+}
+
+body.dark-mode pre {
+  border-color: var(--border);
+}
+
+body.dark-mode blockquote {
+  background: var(--bg-surface);
+}

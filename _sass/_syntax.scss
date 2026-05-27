@@ -1,0 +1,124 @@
+/* ============================================
+   _syntax.scss — Code block / syntax highlighting
+   ============================================ */
+
+/* Rouge / Pygments compatible classes */
+.highlight .c,
+.highlight .c1,
+.highlight .cm { color: #7a7a78; font-style: italic; } /* Comments */
+.highlight .k,
+.highlight .kd,
+.highlight .kn,
+.highlight .kp,
+.highlight .kr { color: #3553ff; font-weight: 500; } /* Keywords */
+.highlight .kt { color: #3553ff; } /* Keyword Type */
+.highlight .s,
+.highlight .s1,
+.highlight .s2,
+.highlight .sb,
+.highlight .sc,
+.highlight .sd,
+.highlight .se,
+.highlight .sh,
+.highlight .si,
+.highlight .sx,
+.highlight .sr,
+.highlight .ss { color: #2e8b57; } /* Strings */
+.highlight .na { color: #d4570b; } /* Name Attribute */
+.highlight .nb { color: #986840; } /* Name Built-in */
+.highlight .nc { color: #3553ff; } /* Name Class */
+.highlight .no { color: #c3603d; } /* Name Constant */
+.highlight .nd { color: #7a7a78; } /* Name Decorator */
+.highlight .nf { color: #3553ff; } /* Name Function */
+.highlight .nn { color: #1a1a1a; } /* Name Namespace */
+.highlight .nt { color: #d4570b; } /* Name Tag */
+.highlight .nv,
+.highlight .vi,
+.highlight .vc,
+.highlight .vg { color: #c3603d; } /* Name Variable */
+.highlight .o,
+.highlight .ow { color: #1a1a1a; } /* Operators */
+.highlight .mi,
+.highlight .mf,
+.highlight .mh,
+.highlight .mo,
+.highlight .il { color: #c3603d; } /* Numbers */
+.highlight .p { color: #1a1a1a; } /* Punctuation */
+.highlight .n { color: #1a1a1a; } /* Name */
+.highlight .err { color: #c3603d; } /* Error */
+.highlight .gd { color: #c3603d; background: rgba(195, 96, 61, 0.08); } /* Generic Deleted */
+.highlight .gi { color: #2e8b57; background: rgba(46, 139, 87, 0.08); } /* Generic Inserted */
+.highlight .gh { color: #3553ff; font-weight: 500; } /* Generic Heading */
+.highlight .go { color: #7a7a78; } /* Generic Output */
+
+/* Dark mode syntax */
+body.dark-mode .highlight .c,
+body.dark-mode .highlight .c1,
+body.dark-mode .highlight .cm { color: #6a6a6a; }
+body.dark-mode .highlight .k,
+body.dark-mode .highlight .kd,
+body.dark-mode .highlight .kn,
+body.dark-mode .highlight .kp,
+body.dark-mode .highlight .kr,
+body.dark-mode .highlight .kt { color: #5b7aff; }
+body.dark-mode .highlight .s,
+body.dark-mode .highlight .s1,
+body.dark-mode .highlight .s2,
+body.dark-mode .highlight .sb,
+body.dark-mode .highlight .sc,
+body.dark-mode .highlight .sd,
+body.dark-mode .highlight .se,
+body.dark-mode .highlight .sh,
+body.dark-mode .highlight .si,
+body.dark-mode .highlight .sx,
+body.dark-mode .highlight .sr,
+body.dark-mode .highlight .ss { color: #6bc97d; }
+body.dark-mode .highlight .na { color: #e8915a; }
+body.dark-mode .highlight .nb { color: #c9956b; }
+body.dark-mode .highlight .nc { color: #5b7aff; }
+body.dark-mode .highlight .no { color: #e8915a; }
+body.dark-mode .highlight .nf { color: #5b7aff; }
+body.dark-mode .highlight .nt { color: #e8915a; }
+body.dark-mode .highlight .nv,
+body.dark-mode .highlight .vi,
+body.dark-mode .highlight .vc,
+body.dark-mode .highlight .vg { color: #e8915a; }
+body.dark-mode .highlight .o,
+body.dark-mode .highlight .ow { color: #e0e0e0; }
+body.dark-mode .highlight .mi,
+body.dark-mode .highlight .mf,
+body.dark-mode .highlight .mh,
+body.dark-mode .highlight .mo,
+body.dark-mode .highlight .il { color: #e8915a; }
+body.dark-mode .highlight .p { color: #e0e0e0; }
+body.dark-mode .highlight .n { color: #e0e0e0; }
+body.dark-mode .highlight .gd { color: #e8915a; background: rgba(232, 145, 90, 0.1); }
+body.dark-mode .highlight .gi { color: #6bc97d; background: rgba(107, 201, 125, 0.1); }
+body.dark-mode .highlight .gh { color: #5b7aff; }
+body.dark-mode .highlight .go { color: #6a6a6a; }
+
+/* Code figure / listing */
+.highlight {
+  margin: var(--spacing-md) 0;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  overflow: hidden;
+}
+
+.highlighter-rouge .highlight {
+  background: var(--code-bg);
+}
+
+figure.code,
+figure.highlight {
+  margin: var(--spacing-md) 0;
+}
+
+figcaption {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted-light);
+  padding: 0.4rem var(--spacing-md);
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+}
