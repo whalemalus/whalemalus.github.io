@@ -56,6 +56,8 @@
 .post-content {
   font-size: 1.05rem;
   line-height: 1.8;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 
 .post-content h1 {
@@ -215,6 +217,44 @@
 @media (max-width: 640px) {
   .post-header__title {
     font-size: 2rem;
+  }
+
+  .post-content {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .post-content img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .post-content svg {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .post-content pre {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .post-content table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
+
+  .post-content div.highlight,
+  .post-content div.language-mermaid,
+  .post-content .mermaid,
+  .post-content .flowchart,
+  .post-content iframe {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .post-nav {
