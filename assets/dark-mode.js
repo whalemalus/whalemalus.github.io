@@ -1,10 +1,10 @@
 // Dark Mode Toggle
 (function() {
-  const STORAGE_KEY = 'theme-preference';
-  const DARK_CLASS = 'dark-mode';
+  var STORAGE_KEY = 'theme-preference';
+  var DARK_CLASS = 'dark-mode';
 
   function getPreference() {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    var stored = localStorage.getItem(STORAGE_KEY);
     if (stored) return stored;
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   }
@@ -15,32 +15,34 @@
   }
 
   function apply(theme) {
+    // Use documentElement (<html>) since this runs in <head> before <body> exists
+    var el = document.documentElement;
     if (theme === 'dark') {
-      document.body.classList.add(DARK_CLASS);
+      el.classList.add(DARK_CLASS);
     } else {
-      document.body.classList.remove(DARK_CLASS);
+      el.classList.remove(DARK_CLASS);
     }
     updateToggleIcon(theme);
   }
 
   function updateToggleIcon(theme) {
-    const btn = document.getElementById('dark-mode-toggle');
+    var btn = document.getElementById('dark-mode-toggle');
     if (btn) {
       btn.textContent = theme === 'dark' ? '☀' : '☾';
       btn.setAttribute('aria-label', theme === 'dark' ? '切换为亮色模式' : '切换为暗色模式');
     }
   }
 
-  // Apply immediately to prevent flash
+  // Apply immediately (before DOMContentLoaded) to prevent flash
   apply(getPreference());
 
   // Set up toggle button when DOM is ready
   document.addEventListener('DOMContentLoaded', function() {
-    const btn = document.getElementById('dark-mode-toggle');
+    var btn = document.getElementById('dark-mode-toggle');
     if (btn) {
       updateToggleIcon(getPreference());
       btn.addEventListener('click', function() {
-        const current = getPreference();
+        var current = getPreference();
         setPreference(current === 'dark' ? 'light' : 'dark');
       });
     }

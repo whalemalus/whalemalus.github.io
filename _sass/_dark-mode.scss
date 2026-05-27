@@ -2,7 +2,7 @@
    _dark-mode.scss — Dark mode overrides
    ============================================ */
 
-body.dark-mode {
+html.dark-mode {
   --bg: #111111;
   --bg-surface: #1a1a1a;
   --text-primary: #e0e0e0;
@@ -16,22 +16,22 @@ body.dark-mode {
   --header-bg: rgba(17, 17, 17, 0.92);
 }
 
-body.dark-mode img {
+html.dark-mode img {
   opacity: 0.9;
 }
 
-body.dark-mode .home-stats {
+html.dark-mode .home-stats {
   background: var(--bg-surface);
 }
 
-body.dark-mode code {
+html.dark-mode code {
   border-color: var(--border);
 }
 
-body.dark-mode pre {
+html.dark-mode pre {
   border-color: var(--border);
 }
 
-body.dark-mode blockquote {
+html.dark-mode blockquote {
   background: var(--bg-surface);
 }
