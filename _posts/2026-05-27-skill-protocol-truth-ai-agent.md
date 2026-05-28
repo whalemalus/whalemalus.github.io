@@ -4,6 +4,7 @@ date: 2026-05-27
 categories: [AI Agent, 技术深度]
 tags: [AI Agent, Skill, OpenAI协议, Cursor, 工具调用, Prompt Engineering]
 excerpt: "Skills 不是什么高深的协议扩展——它就是一份写给 LLM 的使用手册，让 LLM 通过已有的工具自己照着做。但恰恰是这种'简单'，藏着 AI Agent 架构的深层智慧。"
+cover: "https://whalemalus.com/file/cover-skill-protocol-key"
 ---
 
 # Skill 的协议真相：当 AI Agent 学会「照着手册干活」
