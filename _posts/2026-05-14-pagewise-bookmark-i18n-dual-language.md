@@ -14,7 +14,26 @@ original_url: "https://whalemalus.com/articles/pagewise-bookmark-i18n-dual-langu
 
 # 当书签学会说双语：PageWise BookmarkI18n 的 7 分钟落地实战
 
-> 42 个翻译键、11 个文件外部化、3373 个测试全绿——一次高质量的国际化迭代是如何炼成的？
+> 42 个翻译键、11 个文件外部化、3373 个测试全绿，一次高质量的国际化迭代是如何炼成的？
+
+## 楔子
+
+智阅 PageWise 的 Chrome 扩展要走向国际化，中英文界面切换成了高频需求。一次迭代，42 个翻译键，11 个文件外部化，3373 个测试全绿——这是 R80 迭代的完整复盘。
+
+## 引言
+
+本文复盘 PageWise 项目 R80 迭代的完整过程——为书签系统引入国际化（i18n）支持。从技术方案设计到测试验证，记录一次「小而精」的高质量迭代是如何完成的。
+
+## 目录
+
+- [楔子](#楔子)
+- [引言](#引言)
+- [背景](#背景)
+- [技术方案](#技术方案)
+- [测试](#测试)
+- [代码变更概览](#代码变更概览)
+- [过程中的小插曲](#过程中的小插曲)
+- [总结](#总结)
 
 ## 背景
 
@@ -24,7 +43,7 @@ original_url: "https://whalemalus.com/articles/pagewise-bookmark-i18n-dual-langu
 
 ## 技术方案
 
-### 1. i18n 核心模块
+### i18n 核心模块
 
 新建了 `bookmark-i18n.js` 模块，实现了以下能力：
 
@@ -37,11 +56,11 @@ original_url: "https://whalemalus.com/articles/pagewise-bookmark-i18n-dual-langu
 // 核心 API 设计
 export function t(key, params = {}) {
   const template = translations[currentLocale]?.[key] || translations.en[key] || key
-  return template.replace(/\{\{(\w+)\}\}/g, (_, k) => params[k] ?? '')
+  return template.replace(/\\\\\\\\{\\\\\\\\{(\\\\\\\\w+)\\\\\\\\}\\\\\\\\}/g, (_, k) => params[k] ?? '')
 }
 ```
 
-### 2. Chrome 标准 i18n 文件
+### Chrome 标准 i18n 文件
 
 按照 Chrome 扩展标准，在 `_locales/` 目录下创建了两套语言文件：
 
@@ -53,7 +72,7 @@ _locales/
 
 每个消息条目包含 `message`（翻译文本）和 `description`（上下文说明），方便后续维护。
 
-### 3. 界面外部化
+### 界面外部化
 
 对 11 个涉及书签系统的文件进行了硬编码文本提取：
 
@@ -66,7 +85,7 @@ _locales/
 | `options/bookmark-panel.js` | 设置页面的选项文本 |
 | `popup/bookmark-overview.js` | 弹出窗口的概览文本 |
 
-## 质量保障
+## 测试
 
 ### 测试策略
 
@@ -100,20 +119,20 @@ BookmarkI18n 专项测试:  37/37 ✅
 
 ## 过程中的小插曲
 
-迭代开始时，飞轮引擎的脚本因为 `/tmp` 目录的权限限制而报错。这是一个典型的容器环境权限问题——`runuser` 切换用户后无法写入 `/tmp`。
+迭代开始时，飞轮引擎的脚本因为 `/tmp` 目录的权限限制而报错。这是一个典型的容器环境权限问题，`runuser` 切换用户后无法写入 `/tmp`。
 
 解决方案很简单：将临时目录从系统 `/tmp` 改为项目内部的 `.tmp/`，并将其加入 `.gitignore`。这个修复被记录在了飞轮引擎的 pitfalls 参考文档中，避免未来重复踩坑。
 
 ## 总结
 
-BookmarkI18n 迭代是一个典型的「小而精」的高质量迭代：
+BookmarkI18n 迭代是一个典型的「小而精」的迭代：
 
 - **范围明确**：只做书签系统的 i18n，不贪多
 - **标准合规**：遵循 Chrome 扩展的 `_locales` 标准
 - **测试充分**：37 个专项测试 + 3373 全量回归
-- **速度惊人**：从开始到完成仅 7 分钟
+- **速度快**：从开始到完成仅 7 分钟
 
-国际化看似简单，但要做好需要对每一个用户可见文本的精确把控。这次迭代为后续扩展其他模块的 i18n 支持打下了坚实的基础。
+国际化看似简单，但要做好需要对每一个用户可见文本的精确把控。这次迭代为后续扩展其他模块的 i18n 支持打下了基础。
 
 ---
 

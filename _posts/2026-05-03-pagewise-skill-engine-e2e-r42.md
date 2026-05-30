@@ -12,7 +12,7 @@ header:
 original_url: "https://whalemalus.com/articles/pagewise-skill-engine-e2e-r42"
 ---
 
-# 标题
+# PageWise R42：Skill Engine 测试发现了一个"不是 bug 的 bug"
 
 > **摘要**：PageWise 在第 42 轮飞轮迭代中完成了 Skill Engine 的端到端测试，发现 `saveSkill()` 故意不持久化参数字段这一设计决策。同时完成了 W18 周度复盘，项目测试覆盖率达到 1.44:1 的测试/代码比。
 >
@@ -36,17 +36,17 @@ PageWise 是一个 Chrome 浏览器扩展（Manifest V3），用纯 JavaScript +
 
 到第 42 轮迭代时，项目已经完成了 157 次提交，积累了 16,704 行代码和 24,051 行测试。这篇文章记录 R42 的 Skill Engine 测试过程，以及 W18 周度复盘的关键发现。
 
-## 📖 目录
+## 目录
 
-1. [全景地图](#1-全景地图)
-2. [核心概念](#2-核心概念)
-3. [实战指南](#3-实战指南)
+- [全景地图](#全景地图)
+- [核心概念](#核心概念)
+- [实战指南](#实战指南)
+- [踩坑记录](#踩坑记录)
+- [总结](#总结)
 
 ---
 
 ## 全景地图
-
-> 鸟瞰 PageWise 测试体系的完整架构，理解各模块之间的关系
 
 ### 架构图
 
@@ -96,9 +96,7 @@ R35 错误处理 → R41 PDF 提取 → R42 Skill Engine → W18 复盘 → ROAD
 
 ---
 
-## 2. 核心概念
-
-> 关键术语和原理的深度解释
+## 核心概念
 
 ### 飞轮迭代方法论
 
@@ -138,9 +136,7 @@ Guard Agent 的五维评分系统：
 
 ---
 
-## 3. 实战指南
-
-> 从零开始的实操步骤
+## 实战指南
 
 ### R42 Skill Engine E2E 测试
 
@@ -225,7 +221,7 @@ async saveSkill(skill) {
 }
 ```
 
-这个发现来自测试过程：当测试期望 `saveSkill()` + `getSkillById()` 能完整保留 `parameters` 字段时，测试失败了。深入分析后发现，`toEngineSkill()` 桥接函数在技能执行时动态注入参数，持久化参数反而会造成状态污染。
+这个发现来自测试过程：当测试期望 `saveSkill()` + `getSkillById()` 能完整保留 `parameters` 字段时，测试失败了。分析后发现，`toEngineSkill()` 桥接函数在技能执行时动态注入参数，持久化参数反而会造成状态污染。
 
 #### Pre-Reading Pattern
 
@@ -331,11 +327,19 @@ api_key = settings.get('apiKey', '')
 
 ---
 
-## 总结与展望
+## 总结
 
-- **核心收获**：E2E 测试不仅能发现 bug，还能验证设计决策。R42 中发现的 `saveSkill()` 不持久化参数，如果不是写了测试，这个设计意图可能永远不会被文档化。
-- **最佳实践**：Pre-Reading Pattern 是用 Claude Code 写测试的最高效方式——把 API 签名嵌入 prompt，而不是让它自己去读源码。
-- **延伸阅读**：飞轮迭代方法论详见 [飞轮迭代：让 AI Agent 持续改进项目的工程方法](https://whalemalus.com/article/flywheel-iteration-methodology)
+### 核心收获
+
+E2E 测试不仅能发现 bug，还能验证设计决策。R42 中发现的 `saveSkill()` 不持久化参数，如果不是写了测试，这个设计意图可能永远不会被文档化。
+
+### 最佳实践
+
+Pre-Reading Pattern 是用 Claude Code 写测试的最高效方式——把 API 签名嵌入 prompt，而不是让它自己去读源码。
+
+### 延伸阅读
+
+飞轮迭代方法论详见 [飞轮迭代：让 AI Agent 持续改进项目的工程方法](https://whalemalus.com/article/flywheel-iteration-methodology)
 
 **下一步计划**：
 - R43: Spaced Repetition E2E（间隔重复算法测试）

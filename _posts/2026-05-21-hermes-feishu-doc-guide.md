@@ -22,7 +22,7 @@ original_url: "https://whalemalus.com/articles/hermes-feishu-doc-guide"
 
 ## 楔子
 
-凌晨两点，你还在手动把飞书文档里的会议纪要复制到 AI 助手的对话框里。复制、粘贴、提问、复制回答、切回飞书、粘贴——来回七八次，脖子已经僵了。
+凌晨两点，你还在手动把飞书文档里的会议纪要复制到 AI 助手的对话框里。复制、粘贴、提问、复制回答、切回飞书、粘贴，来回七八次，脖子已经僵了。
 
 你心想：能不能让 AI 直接读我的飞书文档？甚至帮我把总结写回飞书？
 
@@ -44,7 +44,20 @@ original_url: "https://whalemalus.com/articles/hermes-feishu-doc-guide"
 
 ---
 
-## 📖 目录
+
+## 目录
+
+- [楔子](#楔子)
+- [引言](#引言)
+- [全景地图](#全景地图)
+- [方案一：lark-cli 官方工具（推荐）](#方案一lark-cli-官方工具推荐)
+- [方案二：飞书开放 API（备用）](#方案二飞书开放-api备用)
+- [实战：读取飞书文档](#实战读取飞书文档)
+- [实战：编辑飞书文档](#实战编辑飞书文档)
+- [踩坑记录](#踩坑记录)
+- [总结与展望](#总结与展望)
+
+## 目录
 
 1. [全景地图](#全景地图)
 2. [方案一：lark-cli 官方工具（推荐）](#方案一lark-cli-官方工具推荐)
@@ -173,9 +186,9 @@ echo "FEISHU_APP_SECRET=xxxxx" >> ~/.hermes/.env
 
 ```bash
 source ~/.hermes/.env
-TOKEN=$(curl -s -X POST "https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal" \
-  -H "Content-Type: application/json" \
-  -d "{\"app_id\":\"${FEISHU_APP_ID}\",\"app_secret\":\"${FEISHU_APP_SECRET}\"}" \
+TOKEN=$(curl -s -X POST "https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal" \\\\
+  -H "Content-Type: application/json" \\\\
+  -d "{\"app_id\":\"${FEISHU_APP_ID}\",\"app_secret\":\"${FEISHU_APP_SECRET}\"}" \\\\
   | python3 -c "import json,sys; print(json.load(sys.stdin)['tenant_access_token'])")
 echo "Token: ${TOKEN:0:20}..."
 ```
@@ -192,11 +205,11 @@ Token 有效期约 2 小时，长时间操作需要刷新。
 
 ```bash
 # 获取文档元信息
-curl -s "https://open.feishu.cn/open-apis/docx/v1/documents/${DOC_TOKEN}" \
+curl -s "https://open.feishu.cn/open-apis/docx/v1/documents/${DOC_TOKEN}" \\\\
   -H "Authorization: Bearer ${TOKEN}"
 
 # 获取文档块（每页最多 500 个 block）
-curl -s "https://open.feishu.cn/open-apis/docx/v1/documents/${DOC_TOKEN}/blocks?page_size=500" \
+curl -s "https://open.feishu.cn/open-apis/docx/v1/documents/${DOC_TOKEN}/blocks?page_size=500" \\\\
   -H "Authorization: Bearer ${TOKEN}"
 ```
 
@@ -262,13 +275,13 @@ lark-cli docs +update --doc "ABC123" --mode append --markdown @/tmp/ai-summary.m
 
 ```bash
 # 在某个章节标题后面插入
-lark-cli docs +update --doc "ABC123" --mode insert_after \
-  --selection-by-title "## 会议记录" \
+lark-cli docs +update --doc "ABC123" --mode insert_after \\\\
+  --selection-by-title "## 会议记录" \\\\
   --markdown @/tmp/new-content.md
 
 # 在模糊匹配的文本后面插入
-lark-cli docs +update --doc "ABC123" --mode insert_after \
-  --selection-with-ellipsis "讨论了...最终决定" \
+lark-cli docs +update --doc "ABC123" --mode insert_after \\\\
+  --selection-with-ellipsis "讨论了...最终决定" \\\\
   --markdown @/tmp/follow-up.md
 ```
 
@@ -281,11 +294,11 @@ lark-cli docs +update --doc "ABC123" --mode overwrite --markdown @/tmp/full-cont
 ### 创建新文档
 
 ```bash
-cd /path/to/file && lark-cli docs +create \
-  --title "AI 自动生成报告" \
-  --markdown @report.md \
-  --wiki-space my_library \
-  --as user \
+cd /path/to/file && lark-cli docs +create \\\\
+  --title "AI 自动生成报告" \\\\
+  --markdown @report.md \\\\
+  --wiki-space my_library \\\\
+  --as user \\\\
   --jq '.doc_url'
 ```
 

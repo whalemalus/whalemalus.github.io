@@ -12,6 +12,8 @@ header:
 original_url: "https://whalemalus.com/articles/openclaw-feishu-streaming-config"
 ---
 
+# OpenClaw 飞书流式输出：4 个配置项的排查实录
+
 > **摘要**：通过 OpenClaw 接入飞书后，AI 回复既慢又看不到思考过程。排查发现是 4 个配置项缺失——`blockStreaming`、`thinkingDefault`、`reasoningDefault`、`verboseDefault`。本文记录完整的排查过程和配置方法。
 >
 > **关键词**：`OpenClaw` `飞书` `流式输出` `AI 网关` `配置调优`
@@ -34,19 +36,19 @@ OpenClaw 是一个开源的 AI 助手网关，支持接入飞书、Telegram、Di
 
 本文记录我排查这个问题的完整过程，包括 4 个关键配置项的含义、配置方法，以及一个让我卡了很久的 schema 校验坑。
 
-## 📖 目录
+## 目录
 
-1. [全景地图](#全景地图)
-2. [核心概念](#核心概念)
-3. [实战指南](#实战指南)
-4. [踩坑记录](#踩坑记录)
-5. [总结与展望](#总结与展望)
+- [全景地图](#全景地图)
+- [核心概念](#核心概念)
+- [实战指南](#实战指南)
+- [踩坑记录](#踩坑记录)
+- [总结](#总结)
 
 ---
 
 ## 全景地图
 
-> 鸟瞰 OpenClaw 飞书频道的完整消息流转架构
+### OpenClaw 飞书消息流转架构
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -281,7 +283,7 @@ channels.feishu: invalid config: must NOT have additional properties
 
 **解决**：日常使用建议用 `on`（只显示调用信息），调试时再临时切到 `full`。
 
-## 总结与展望
+## 总结
 
 ### 核心收获
 

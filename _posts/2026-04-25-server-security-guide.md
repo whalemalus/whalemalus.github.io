@@ -103,6 +103,20 @@ original_url: "https://whalemalus.com/articles/server-security-guide"
 
 ---
 
+
+## 目录
+
+- [全景地图：服务器安全体系](#全景地图服务器安全体系)
+- [一、服务器安全加固](#一服务器安全加固)
+- [二、Cloudflare DNS 配置](#二cloudflare-dns-配置)
+- [三、NPM 反向代理配置](#三npm-反向代理配置)
+- [四、OpenClaw 跨域访问配置](#四openclaw-跨域访问配置)
+- [五、最终访问方式](#五最终访问方式)
+- [六、安全检查清单](#六安全检查清单)
+- [七、常见问题](#七常见问题)
+- [八、信息脱敏说明](#八信息脱敏说明)
+
+
 ## 一、服务器安全加固
 
 ### 1.1 安装并配置 fail2ban
@@ -511,230 +525,22 @@ docker compose restart openclaw
 **发布前检查命令：**
 ```bash
 # 检查是否包含真实IP
-grep -oE '[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}' 文件.md | sort -u
-
-# 检查是否包含敏感信息
-grep -iE 'password|密码|token|secret' 文件.md
 ```
 
----
+## 总结
 
-*文档版本：2026-04-25*
-*环境：Ubuntu + Docker + 1Panel + NPM + Cloudflare*
+### 核心收获
 
----
+本次安全加固完成了从「裸奔」到「武装到牙齿」的转变：
 
-## 九、问题排查与解决方案
+- fail2ban 自动封禁暴力破解 IP，recidive 规则对重复犯罪者永久封禁
+- UFW 防火墙只开放 22/80/443 三个端口，管理面板全部通过反向代理访问
+- NPM 反向代理统一域名入口，HTTPS 加密由 Cloudflare 处理
+- 跨域问题通过修改 OpenClaw 的 allowedOrigins 配置解决
 
-### 9.1 1Panel 安全入口问题
+### 最佳实践
 
-**问题描述：**
-访问 1Panel 时显示 "Access Temporarily Unavailable"，无法进入登录页面。
-
-**原因分析：**
-1Panel 默认启用了安全入口（SecurityEntrance），必须通过特定路径 `/mypanel` 访问。
-
-**解决方案：**
-
-**方案一：禁用安全入口（推荐）**
-```bash
-# 修改数据库
-sqlite3 /opt/1panel/db/core.db "UPDATE settings SET value='' WHERE key='SecurityEntrance';"
-
-# 重启服务
-systemctl restart 1panel-core
-```
-
-**方案二：保留安全入口**
-在 NPM 中配置路径重写，将 `/` 重定向到 `/mypanel`。
-
----
-
-### 9.2 NPM 无法代理到自身
-
-**问题描述：**
-创建 `npm.whalemalus.com` 代理主机，指向 NPM 自身的管理端口（30081），但访问时超时或无法连接。
-
-**原因分析：**
-NPM 无法代理到自身，会产生循环代理问题。NPM 容器内部的管理端口是 81，映射到主机的 30081。当 NPM 尝试代理到 `172.18.0.1:30081` 时，实际上是在请求自己，导致循环。
-
-**解决方案：**
-- **不创建 NPM 自身的代理**，直接通过 1Panel 管理 NPM
-- 或者使用其他反向代理（如 Caddy）来代理 NPM
-
-**删除错误的代理：**
-```bash
-TOKEN=*** -s -X POST http://localhost:30081/api/tokens 
-  -H "Content-Type: application/json" 
-  -d '{"identity":"<管理员邮箱>","secret": "***"}' | python3 -c "import sys,json; print(json.load(sys.stdin)['token'])")
-
-# 删除代理主机
-curl -s -X DELETE http://localhost:30081/api/nginx/proxy-hosts/<代理ID> 
-  -H "Authorization: Bearer *** 9.3 OpenClaw 跨域访问被拒绝
-
-**问题描述：**
-通过域名访问 OpenClaw Control UI 时，输入 Token 后无法连接，报错：
-```
-origin not allowed (open the Control UI from the gateway host or allow it in gateway.controlUi.allowedOrigins)
-```
-
-**原因分析：**
-OpenClaw 的 `gateway.controlUi.allowedOrigins` 默认只允许本地访问，不包含域名。
-
-**解决方案：**
-编辑配置文件，添加域名到白名单：
-```bash
-vi /opt/1panel/apps/<app-name>/data/conf/openclaw.json
-```
-
-修改 `gateway.controlUi.allowedOrigins`：
-```json
-{
-  "gateway": {
-    "controlUi": {
-      "allowedOrigins": [
-        "http://127.0.0.1:18789",
-        "http://<服务器IP>:18789",
-        "https://openclaw.<your-domain.com>"
-      ]
-    }
-  }
-}
-```
-
-重启容器：
-```bash
-cd /opt/1panel/apps/<app-name>
-docker compose restart openclaw
-```
-
----
-
-### 9.4 SSH 暴力破解攻击
-
-**问题描述：**
-服务器 SSH 端口遭受大量暴力破解尝试，日志显示数千次失败登录。
-
-**解决方案：**
-安装并配置 fail2ban 自动封禁攻击IP（详见第一章）。
-
-**查看已封禁IP：**
-```bash
-fail2ban-client status sshd
-```
-
-**手动解封IP：**
-```bash
-fail2ban-client set sshd unbanip <IP地址>
-```
-
----
-
-### 9.5 博客文章显示乱码
-
-**问题描述：**
-通过数据库直接插入的文章内容在博客前端显示为乱码。
-
-**原因分析：**
-MySQL 客户端连接编码不正确，中文字符被错误编码。
-
-**解决方案：**
-使用 Base64 编码插入数据：
-```bash
-# 将内容编码为 Base64
-CONTENT=$(cat article.md | base64 -w 0)
-
-# 使用 FROM_BASE64 解码插入
-docker exec dimstack-mysql mysql -uroot -p<密码> dim_stack -e 
-  "UPDATE article SET article_content = FROM_BASE64('$CONTENT') WHERE id = <文章ID>;"
-```
-
----
-
-### 9.6 Docker 容器间网络不通
-
-**问题描述：**
-NPM 无法代理到其他容器（如 OpenClaw），显示 502 错误。
-
-**原因分析：**
-容器不在同一个 Docker 网络中，无法通过容器名或IP通信。
-
-**解决方案：**
-确保容器在同一个网络中：
-```bash
-# 查看容器网络
-docker inspect <容器名> --format '{{json .NetworkSettings.Networks}}'
-
-# 将容器加入网络
-docker network connect <网络名> <容器名>
-```
-
----
-
-### 9.7 防火墙阻止 Docker 流量
-
-**问题描述：**
-启用 UFW 防火墙后，NPM 无法代理到主机上的服务（如 1Panel）。
-
-**原因分析：**
-Docker 容器访问主机端口时，流量被防火墙拦截。
-
-**解决方案：**
-添加规则允许 Docker 网络访问：
-```bash
-ufw allow from 172.18.0.0/16 to any port <端口号>
-```
-
----
-
-### 9.8 Cloudflare Origin 证书不匹配
-
-**问题描述：**
-NPM 中上传 Cloudflare Origin 证书后，访问域名显示证书错误。
-
-**原因分析：**
-证书的域名列表不包含当前访问的域名。
-
-**解决方案：**
-1. 在 Cloudflare 控制台重新生成证书，确保包含所有需要的域名
-2. 域名列表应包括：`*.your-domain.com` 和 `your-domain.com`
-
----
-
-### 9.9 1Panel 密码忘记
-
-**问题描述：**
-忘记 1Panel 登录密码。
-
-**解决方案：**
-```bash
-# 重置密码
-1pctl update password
-```
-
-按照提示输入新密码即可。
-
----
-
-### 9.10 NPM 默认密码忘记
-
-**问题描述：**
-忘记 NPM 管理面板密码。
-
-**解决方案：**
-```bash
-# 重置 NPM 数据库中的密码
-docker exec <npm容器名> sqlite3 /data/database.sqlite 
-  "UPDATE auth SET password='$2a$10$xxxxx' WHERE id=1;"
-```
-
-或者删除 NPM 数据目录重新初始化：
-```bash
-cd /opt/1panel/apps/nginx-proxy-manager/nginx-proxy-manager
-rm -rf data/database.sqlite
-docker compose restart
-```
-
----
-
-*更多问题排查请参考各章节的详细说明*
+- 安全加固要在部署应用之前完成，不要留到「以后」
+- 所有管理面板通过域名加 HTTPS 访问，不暴露原始端口
+- API Token 用完立即删除，避免泄露风险
+- 定期检查 fail2ban 日志，了解服务器面临的威胁态势

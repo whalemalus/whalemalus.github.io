@@ -14,7 +14,7 @@ original_url: "https://whalemalus.com/articles/cloudflare-npm-guide"
 
 # Cloudflare + Nginx Proxy Manager：域名配置与反向代理完全指南
 
-> **摘要**：本文完整记录了从购买域名、配置 Cloudflare DNS、部署 Nginx Proxy Manager（NPM）反向代理到实现 HTTPS 访问的全流程。涵盖 6 个关键步骤和多个实战踩坑点，适合需要为服务器配置域名访问的开发者参考。
+> **摘要**：本文记录了从购买域名、配置 Cloudflare DNS、部署 Nginx Proxy Manager（NPM）反向代理到实现 HTTPS 访问的全流程。涵盖 6 个关键步骤和多个实战踩坑点，适合需要为服务器配置域名访问的开发者参考。
 >
 > **关键词**：`Cloudflare` `Nginx Proxy Manager` `反向代理` `HTTPS` `域名配置`
 
@@ -34,10 +34,9 @@ original_url: "https://whalemalus.com/articles/cloudflare-npm-guide"
 
 如果你也正在经历类似的折磨，这篇攻略也许能帮你少走一些弯路。
 
+## 全景地图
 
-## 全景地图：域名配置与反向代理
-
-> 鸟瞰域名解析和反向代理的完整流程，理解各组件之间的关系
+> 鸟瞰域名解析和反向代理的流程，理解各组件之间的关系
 
 ### 域名访问流程
 
@@ -89,31 +88,27 @@ original_url: "https://whalemalus.com/articles/cloudflare-npm-guide"
 
 本文会带你走完这 6 个步骤，每一步都有完整的命令和配置，以及踩坑记录。目标是：**看完就能配好，配好就能用。**
 
-## 📖 目录
+## 目录
 
-- [一、问题背景](#一问题背景)
-- [二、技术架构总览](#二技术架构总览)
-- [三、遇到的问题清单](#三遇到的问题清单)
-- [四、完整解决步骤](#四完整解决步骤)
-  - [步骤 1：修改 NPM 端口映射](#步骤-1修改-npm-端口映射)
-  - [步骤 2：重置 NPM 管理员密码](#步骤-2重置-npm-管理员密码)
-  - [步骤 3：通过 NPM API 创建代理主机](#步骤-3通过-npm-api-创建代理主机)
-  - [步骤 4：上传 Cloudflare Origin Certificate](#步骤-4上传-cloudflare-origin-certificate)
-  - [步骤 5：手动创建 NPM Nginx 配置](#步骤-5手动创建-npm-nginx-配置)
-  - [步骤 6：修正 Cloudflare DNS](#步骤-6修正-cloudflare-dns)
-- [五、最终验证](#五最终验证)
-- [六、常见坑和注意事项](#六常见坑和注意事项)
-- [七、附录：常用命令速查](#七附录常用命令速查)
+- [楔子](#楔子)
+- [全景地图](#全景地图)
+- [引言](#引言)
+- [问题背景](#问题背景)
+- [技术架构总览](#技术架构总览)
+- [问题清单](#问题清单)
+- [实战指南](#实战指南)
+- [验证](#验证)
+- [踩坑记录](#踩坑记录)
+- [附录：常用命令速查](#附录常用命令速查)
+- [总结](#总结)
 
----
+## 问题背景
 
-## 一、问题背景
-
-### 🎯 我们的目标
+### 我们的目标
 
 在一台 **RackNerd VPS**（IP: `<你的服务器公网IP>`）上部署了多个服务（博客、OpenClaw 等），希望通过域名 **whalemalus.com** 直接访问这些服务，并配置 HTTPS 加密。
 
-### 🏗️ 当前环境
+### 当前环境
 
 | 组件 | 说明 |
 |------|------|
@@ -124,17 +119,17 @@ original_url: "https://whalemalus.com/articles/cloudflare-npm-guide"
 | **反向代理** | Nginx Proxy Manager（1Panel 安装，Docker 部署） |
 | **博客服务** | 运行在端口 2222 |
 
-### 🔀 域名解析流程
+### 域名解析流程
 
 ```
 用户浏览器 → 域名 whalemalus.com → Cloudflare DNS → 服务器 IP: <你的服务器公网IP>
 ```
 
-听起来很简单对吧？但实际上，我们遇到了一系列"坑"。下面我们逐一解决。
+听起来很简单对吧？但其实，我们遇到了一系列"坑"。下面我们逐一解决。
 
 ---
 
-## 二、技术架构总览
+## 技术架构总览
 
 在开始之前，先看看最终目标架构：
 
@@ -181,11 +176,11 @@ original_url: "https://whalemalus.com/articles/cloudflare-npm-guide"
 
 ---
 
-## 三、遇到的问题清单
+## 问题清单
 
 在配置过程中，我们踩了不少坑。这里先列出所有问题，后面逐一解决：
 
-### ❌ 问题 1：端口映射错误
+### 问题 1：端口映射错误
 
 1Panel 安装的 Nginx Proxy Manager 默认将容器端口映射到 `30080`（HTTP）和 `30443`（HTTPS），而非标准的 `80` 和 `443`。
 
@@ -201,7 +196,7 @@ original_url: "https://whalemalus.com/articles/cloudflare-npm-guide"
 服务器:30443 → NPM 容器:443
 ```
 
-### ❌ 问题 2：Cloudflare DNS 中有错误的 A 记录
+### 问题 2：Cloudflare DNS 中有错误的 A 记录
 
 Cloudflare 的 DNS 配置中存在多个 A 记录，其中包含了不属于我们的 IP：
 
@@ -213,21 +208,21 @@ whalemalus.com → <示例IP-B>   ❌ 错误（不知道哪里来的）
 
 Cloudflare 会对这些 A 记录进行 **轮询 (Round Robin)**，导致大约 1/3 的请求被发送到错误的服务器。
 
-### ❌ 问题 3：SSL 证书配置
+### 问题 3：SSL 证书配置
 
 Cloudflare 提供了 **Universal SSL**（Let's Encrypt 颁发），但 Cloudflare 到源站服务器之间也需要加密。需要生成 **Cloudflare Origin Certificate** 并配置到 NPM。
 
-### ❌ 问题 4：NPM API 更新后配置未自动生成
+### 问题 4：NPM API 更新后配置未自动生成
 
 通过 NPM 的 API 创建代理主机和上传证书后，Nginx 的实际配置文件并没有自动生成！需要手动创建。
 
 ---
 
-## 四、完整解决步骤
+## 实战指南
 
 ### 步骤 1：修改 NPM 端口映射
 
-#### 1.1 停用主机上的 Nginx（如果有的话）
+### 1.1 停用主机上的 Nginx（如果有的话）
 
 首先检查服务器上是否有独立安装的 Nginx 在占用 80/443 端口：
 
@@ -240,7 +235,7 @@ sudo systemctl stop nginx
 sudo systemctl disable nginx
 ```
 
-#### 1.2 查找 NPM 的 docker-compose 文件
+### 1.2 查找 NPM 的 docker-compose 文件
 
 NPM 通常由 1Panel 安装，配置文件在 1Panel 的应用目录中：
 
@@ -252,7 +247,7 @@ find / -name "docker-compose.yml" -path "*/nginx*" 2>/dev/null
 ls /opt/nginx-proxy-manager/
 ```
 
-#### 1.3 修改 .env 文件
+### 1.3 修改 .env 文件
 
 找到 `.env` 文件，修改端口配置：
 
@@ -276,7 +271,7 @@ PANEL_APP_PORT_HTTP1=80
 PANEL_APP_PORT_HTTP2=443
 ```
 
-#### 1.4 重建容器
+### 1.4 重建容器
 
 ```bash
 docker compose down
@@ -298,7 +293,7 @@ docker ps | grep nginx-proxy-manager
 
 如果忘记了 NPM 的管理密码，或者需要通过 API 操作但无法登录，可以通过修改数据库来重置密码。
 
-#### 2.1 安装 sqlite3
+### 2.1 安装 sqlite3
 
 ```bash
 # Debian/Ubuntu
@@ -308,7 +303,7 @@ sudo apt update && sudo apt install -y sqlite3
 sudo yum install -y sqlite
 ```
 
-#### 2.2 找到 NPM 数据库文件
+### 2.2 找到 NPM 数据库文件
 
 ```bash
 # 查找数据库文件
@@ -319,7 +314,7 @@ find / -name "database.sqlite" 2>/dev/null
 
 典型路径：`/opt/nginx-proxy-manager/data/database.sqlite`
 
-#### 2.3 查看当前用户
+### 2.3 查看当前用户
 
 ```bash
 sqlite3 /path/to/database.sqlite "SELECT id, email FROM user;"
@@ -331,7 +326,7 @@ sqlite3 /path/to/database.sqlite "SELECT id, email FROM user;"
 1|admin@example.com
 ```
 
-#### 2.4 生成 bcrypt 密码哈希
+### 2.4 生成 bcrypt 密码哈希
 
 ```bash
 # 方法一：使用 Python
@@ -343,7 +338,7 @@ node -e "const bcrypt = require('bcryptjs'); console.log(bcrypt.hashSync('your-n
 # 方法三：在线工具生成 bcrypt hash（注意安全，生成后立即使用）
 ```
 
-#### 2.5 更新数据库中的密码
+### 2.5 更新数据库中的密码
 
 ```bash
 sqlite3 /path/to/database.sqlite "UPDATE auth SET secret='$2b$10$YOUR_HASH_HERE' WHERE user_id=1;"
@@ -351,7 +346,7 @@ sqlite3 /path/to/database.sqlite "UPDATE auth SET secret='$2b$10$YOUR_HASH_HERE'
 
 > 💡 **注意**：在 shell 中使用 bcrypt hash 时，注意 `$` 符号需要转义！
 
-#### 2.6 重启 NPM 容器
+### 2.6 重启 NPM 容器
 
 ```bash
 docker restart nginx-proxy-manager
@@ -365,7 +360,7 @@ docker compose restart
 
 ### 步骤 3：通过 NPM API 创建代理主机
 
-#### 3.1 获取 API Token
+### 3.1 获取 API Token
 
 ```bash
 curl -X POST http://localhost:81/api/tokens 
@@ -392,7 +387,7 @@ curl -X POST http://localhost:81/api/tokens
 export NPM_TOKEN="***"
 ```
 
-#### 3.2 创建代理主机
+### 3.2 创建代理主机
 
 ```bash
 curl -X POST http://localhost:81/api/nginx/proxy-hosts 
@@ -415,7 +410,7 @@ curl -X POST http://localhost:81/api/nginx/proxy-hosts
 >
 > `172.18.0.1` 是 Docker 默认桥接网络的网关 IP，相当于宿主机在 Docker 网络中的地址。而 `host.docker.internal` 在 Linux 上不一定可用（macOS/Windows 通常支持）。
 
-#### 3.3 验证代理主机创建成功
+### 3.3 验证代理主机创建成功
 
 ```bash
 curl -s http://localhost:81/api/nginx/proxy-hosts 
@@ -428,16 +423,16 @@ curl -s http://localhost:81/api/nginx/proxy-hosts
 
 ### 步骤 4：上传 Cloudflare Origin Certificate
 
-#### 4.1 在 Cloudflare 生成 Origin Certificate
+### 4.1 在 Cloudflare 生成 Origin Certificate
 
 1. 登录 [Cloudflare Dashboard](https://dash.cloudflare.com)
 2. 选择你的域名 `whalemalus.com`
 3. 进入 **SSL/TLS** → **Origin Server**
 4. 点击 **Create Certificate**
 5. 保持默认设置：
-   - 私钥类型：RSA (2048)
-   - 主机名：`whalemalus.com`, `*.whalemalus.com`
-   - 有效期：15 年
+ - 私钥类型：RSA (2048)
+ - 主机名：`whalemalus.com`, `*.whalemalus.com`
+ - 有效期：15 年
 6. 点击 **Create**
 7. **复制保存**生成的证书和私钥（私钥只显示一次！）
 
@@ -451,7 +446,7 @@ MIIE...（你的 Origin Certificate）
 [REDACTED PRIVATE KEY]
 ```
 
-#### 4.2 通过 NPM API 上传证书
+### 4.2 通过 NPM API 上传证书
 
 ```bash
 curl -X POST http://localhost:81/api/nginx/certificates 
@@ -479,18 +474,18 @@ MIIE...（完整证书内容）
 CERT=$(cat origin-cert.pem | tr '
 ' '
 ' | sed ':a;N;$!ba;s/
-/\\\\
+/\\\\\\\\
 /g')
 KEY=$(cat origin-key.pem | tr '
 ' '
 ' | sed ':a;N;$!ba;s/
-/\\\\
+/\\\\\\\\
 /g')
 
 # 然后在 JSON 中使用 $CERT 和 $KEY
 ```
 
-#### 4.3 验证证书上传成功
+### 4.3 验证证书上传成功
 
 ```bash
 # 检查证书文件是否生成
@@ -507,14 +502,14 @@ ls -la /opt/nginx-proxy-manager/data/custom_ssl/npm-*/
 
 这是最关键的一步！通过 API 创建代理主机和上传证书后，**Nginx 的配置文件可能不会自动生成**。我们需要手动创建。
 
-#### 5.1 找到 NPM 的 Nginx 配置目录
+### 5.1 找到 NPM 的 Nginx 配置目录
 
 ```bash
 ls /opt/nginx-proxy-manager/data/nginx/proxy_host/
 # 如果为空或不存在配置文件，就需要手动创建
 ```
 
-#### 5.2 创建代理主机配置
+### 5.2 创建代理主机配置
 
 ```bash
 cat > /opt/nginx-proxy-manager/data/nginx/proxy_host/1.conf << 'EOF'
@@ -565,7 +560,7 @@ server {
 EOF
 ```
 
-#### 5.3 创建默认服务器配置
+### 5.3 创建默认服务器配置
 
 为了防止没有匹配到域名的请求暴露信息，需要创建一个默认服务器：
 
@@ -606,7 +601,7 @@ EOF
 
 > 💡 **`ssl_reject_handshake on;`** 的作用：当请求的 SNI（Server Name Indication）不匹配任何已配置的域名时，直接拒绝 TLS 握手，而不是返回默认证书。这样可以防止通过 IP 直接访问获取到不该暴露的信息。
 
-#### 5.4 测试并重载 Nginx 配置
+### 5.4 测试并重载 Nginx 配置
 
 ```bash
 # 进入 NPM 容器测试配置
@@ -622,13 +617,13 @@ docker exec nginx-proxy-manager nginx -s reload
 
 这是导致问题的最大元凶！
 
-#### 6.1 登录 Cloudflare Dashboard
+### 6.1 登录 Cloudflare Dashboard
 
 1. 访问 [Cloudflare Dashboard](https://dash.cloudflare.com)
 2. 选择域名 `whalemalus.com`
 3. 进入 **DNS** → **Records**
 
-#### 6.2 删除错误的 A 记录
+### 6.2 删除错误的 A 记录
 
 你会看到类似这样的 DNS 记录：
 
@@ -642,7 +637,7 @@ docker exec nginx-proxy-manager nginx -s reload
 
 > ⚠️ 这些错误的 IP 可能是 Cloudflare 的默认停放页面 IP，或者是在域名迁移过程中残留的记录。
 
-#### 6.3 最终 DNS 配置
+### 6.3 最终 DNS 配置
 
 正确的 DNS 配置应该只有：
 
@@ -653,7 +648,7 @@ docker exec nginx-proxy-manager nginx -s reload
 
 > 💡 **橙色云朵**表示 Cloudflare 代理模式开启，流量会经过 Cloudflare CDN。**灰色云朵**表示仅做 DNS 解析，不经过 CDN。
 
-#### 6.4 检查 SSL/TLS 设置
+### 6.4 检查 SSL/TLS 设置
 
 在 Cloudflare Dashboard 中：
 
@@ -672,7 +667,7 @@ Full (strict) → 全程加密，且验证源站证书（推荐使用 Origin Cer
 - **Full (strict)**：需要源站使用受信任的证书（Cloudflare Origin Certificate 符合条件）
 - **Full**：接受自签名证书
 
-#### 6.5 确认 Universal SSL 状态
+### 6.5 确认 Universal SSL 状态
 
 进入 **SSL/TLS** → **Edge Certificates**，确认：
 
@@ -681,7 +676,7 @@ Full (strict) → 全程加密，且验证源站证书（推荐使用 Origin Cer
 
 ---
 
-## 五、最终验证
+## 验证
 
 完成以上所有步骤后，进行最终验证：
 
@@ -738,9 +733,9 @@ curl -I https://www.whalemalus.com
 
 ---
 
-## 六、常见坑和注意事项
+## 踩坑记录
 
-### 🕳️ 坑 1：1Panel 覆盖 .env 修改
+### 坑 1：1Panel 覆盖 .env 修改
 
 **现象**：修改了 NPM 的 `.env` 文件中的端口，但过一段时间发现端口又变回 30080/30443。
 
@@ -752,7 +747,7 @@ curl -I https://www.whalemalus.com
 - 方案 B：修改后锁定文件 `chattr +i .env`
 - 方案 C：使用独立的 docker-compose，不通过 1Panel 管理
 
-### 🕳️ 坑 2：host.docker.internal 在 Linux 上不可用
+### 坑 2：host.docker.internal 在 Linux 上不可用
 
 **现象**：在 Docker 容器中使用 `host.docker.internal` 无法连接到宿主机服务。
 
@@ -777,9 +772,9 @@ extra_hosts:
 
 推荐使用 `172.18.0.1` 或 `172.17.0.1`（Docker 网关 IP）。
 
-### 🕳️ 坑 3：NPM API 更新不会自动生成 Nginx 配置
+### 坑 3：NPM API 更新不会自动生成 Nginx 配置
 
-**现象**：通过 API 成功创建了代理主机和上传了证书，但 Nginx 实际上没有加载新配置。
+**现象**：通过 API 成功创建了代理主机和上传了证书，但 Nginx 其实没有加载新配置。
 
 **原因**：NPM 的某些版本中，API 操作只更新数据库，不会自动重新生成 Nginx 配置文件。
 
@@ -794,7 +789,7 @@ docker exec nginx-proxy-manager nginx -s reload
 # 方案 C：通过 Web 界面操作（Web 界面通常会正确生成配置）
 ```
 
-### 🕳️ 坑 4：Cloudflare 默认 A 记录可能是停放页面 IP
+### 坑 4：Cloudflare 默认 A 记录可能是停放页面 IP
 
 **现象**：域名解析到奇怪的 IP，不是自己的服务器。
 
@@ -805,7 +800,7 @@ docker exec nginx-proxy-manager nginx -s reload
 - 仔细检查所有 A 记录，删除不属于自己的 IP
 - 使用 `dig` 命令验证实际解析结果
 
-### 🕳️ 坑 5：中国镜像在海外服务器不可用
+### 坑 5：中国镜像在海外服务器不可用
 
 **现象**：在海外 VPS 上使用中国镜像源安装软件失败。
 
@@ -823,7 +818,7 @@ sudo sed -i 's/mirrors.aliyun.com/archive.debian.org/g' /etc/apt/sources.list
 pip install xxx -i https://pypi.org/simple/
 ```
 
-### 🕳️ 坑 6：SSL 模式配置不匹配
+### 坑 6：SSL 模式配置不匹配
 
 **现象**：Cloudflare 显示 522 错误（Connection Timed Out）或 521 错误（Web Server Is Down）。
 
@@ -840,7 +835,7 @@ pip install xxx -i https://pypi.org/simple/
 
 ---
 
-## 七、附录：常用命令速查
+## 附录：常用命令速查
 
 ### DNS 相关
 
@@ -933,7 +928,7 @@ curl -X POST "https://api.cloudflare.com/client/v4/zones/YOUR_ZONE_ID/dns_record
 
 ---
 
-## 八、总结
+## 总结
 
 通过本文的步骤，我们完成了以下配置：
 
@@ -973,5 +968,3 @@ curl -X POST "https://api.cloudflare.com/client/v4/zones/YOUR_ZONE_ID/dns_record
 > - [1Panel 官方文档](https://1panel.cn/docs/)
 
 ---
-
-*本文由 Hermes Agent 自动生成，记录于 2026年4月。如有问题或建议，欢迎反馈！*

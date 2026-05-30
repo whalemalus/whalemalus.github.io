@@ -14,7 +14,7 @@ original_url: "https://whalemalus.com/articles/four-battles-automation-day"
 
 # 一日四役：从删掉 39,500 行代码到飞轮引擎的集体沉默
 
-> **摘要**：2026 年 5 月 15 日，四场技术实战同时展开——DocMind 从 Gradio 迁移到 Vue 3 删掉近 4 万行代码，PageWise 飞轮迭代引擎连续三轮产出为零，Hermes Agent 接入 7 引擎元搜索，以及一次磁盘 100% 满导致 MySQL 崩溃的紧急抢修。本文记录这一天的完整技术细节与踩坑经验。
+> **摘要**：2026 年 5 月 15 日，四场技术实战同时展开，DocMind 从 Gradio 迁移到 Vue 3 删掉近 4 万行代码，PageWise 飞轮迭代引擎连续三轮产出为零，Hermes Agent 接入 7 引擎元搜索，以及一次磁盘 100% 满导致 MySQL 崩溃的紧急抢修。本文记录这一天的完整技术细节与踩坑经验。
 >
 > **关键词**：`Vue 3 迁移` `飞轮迭代` `自动化陷阱` `磁盘空间` `元搜索`
 
@@ -26,7 +26,7 @@ original_url: "https://whalemalus.com/articles/four-battles-automation-day"
 
 清理完缓存、重启容器、发布完文章，天已经亮了。打开飞书，发现 Claude Code 已经在后台默默删掉了 DocMind 的 39,500 行 Gradio 代码。下午，PageWise 的飞轮迭代引擎跑了三轮，报告上写着"全部通过"，但 git diff 是空的。
 
-这一天像是自动化的压力测试——有些自动化表现惊艳，有些则暴露了深层的信任危机。
+这一天像是自动化的压力测试，有些自动化表现惊艳，有些则暴露了深层的信任危机。
 
 ---
 
@@ -34,11 +34,24 @@ original_url: "https://whalemalus.com/articles/four-battles-automation-day"
 
 自动化是把双刃剑。做得好，它能在你睡觉时删掉 39,500 行废弃代码并让 3,470 个测试全部通过；做得不好，它跑完三轮迭代告诉你"一切正常"，但实际上一行代码都没写。
 
-5 月 15 日这一天，我在四个不同的项目上经历了自动化的两面：DocMind 的 Claude Code 清理堪称教科书，PageWise 的飞轮引擎却连续翻车，Hermes Agent 的搜索插件接入半途而废，而凌晨的磁盘危机则提醒我——再聪明的自动化，也扛不住物理资源的枯竭。
+5 月 15 日这一天，我在四个不同的项目上经历了自动化的两面：DocMind 的 Claude Code 清理做得很顺利，PageWise 的飞轮引擎却连续翻车，Hermes Agent 的搜索插件接入半途而废，而凌晨的磁盘危机则提醒我，再聪明的自动化，也扛不住物理资源的枯竭。
 
 ---
 
-## 📖 目录
+
+## 目录
+
+- [楔子](#楔子)
+- [引言](#引言)
+- [全景地图](#全景地图)
+- [实战一：DocMind 39,500 行 Gradio 代码清理](#实战一docmind-39500-行-gradio-代码清理)
+- [实战二：PageWise 飞轮引擎的三轮沉默](#实战二pagewise-飞轮引擎的三轮沉默)
+- [实战三：Hermes Agent 接入 webserp 元搜索](#实战三hermes-agent-接入-webserp-元搜索)
+- [实战四：磁盘 100% 满的紧急抢修](#实战四磁盘-100-满的紧急抢修)
+- [踩坑记录](#踩坑记录)
+- [总结与展望](#总结与展望)
+
+## 目录
 
 1. [全景地图：四个战场的全局视角](#全景地图)
 2. [实战一：DocMind 39,500 行 Gradio 代码清理](#实战一docmind-39500-行-gradio-代码清理)
@@ -52,7 +65,7 @@ original_url: "https://whalemalus.com/articles/four-battles-automation-day"
 
 ## 全景地图
 
-> 鸟瞰 2026-05-15 四个技术战场的全局关系
+>  2026-05-15 四个技术战场的全局关系
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -91,7 +104,7 @@ original_url: "https://whalemalus.com/articles/four-battles-automation-day"
 
 ### 背景
 
-DocMind 是一个文档智能分析平台，最初用 Gradio 做前端。随着功能复杂化，Gradio 的局限性越来越明显——组件定制困难、状态管理混乱、测试覆盖无法保证。团队决定迁移到 Vue 3 + FastAPI 架构。
+DocMind 是一个文档智能分析平台，最初用 Gradio 做前端。随着功能复杂化，Gradio 的局限性越来越明显，组件定制困难、状态管理混乱、测试覆盖无法保证。团队决定迁移到 Vue 3 + FastAPI 架构。
 
 问题在于：旧的 Gradio 代码散布在 40+ 个组件文件、55 个测试文件和 10+ 个静态资源中，手动清理几乎不可能不出错。
 
@@ -148,7 +161,7 @@ claude --model claude-sonnet-4-20250514 --bare --dangerously-skip-permissions
 
 ### 为什么这次成功了？
 
-1. **任务边界清晰**：删除 Gradio 代码是一个定义明确的操作——找到所有 Gradio 相关文件，删除，修复引用
+1. **任务边界清晰**：删除 Gradio 代码是一个定义明确的操作，找到所有 Gradio 相关文件，删除，修复引用
 2. **有即时反馈**：测试套件 3,470 个测试提供了即时验证
 3. **迭代式修复**：不是一次性完成，而是删完跑测试、失败就修、再跑再修
 4. **不涉及业务逻辑**：纯清理操作，不需要理解复杂的业务需求
@@ -159,7 +172,7 @@ claude --model claude-sonnet-4-20250514 --bare --dangerously-skip-permissions
 
 ### 背景
 
-PageWise 是一个 Chrome 浏览器扩展（Manifest V3），帮助用户在浏览技术网页时即时向 AI 提问。项目采用飞轮迭代引擎——一个自动化的五阶段开发流程：
+PageWise 是一个 Chrome 浏览器扩展（Manifest V3），帮助用户在浏览技术网页时即时向 AI 提问。项目采用飞轮迭代引擎，一个自动化的五阶段开发流程：
 
 ```
 需求分析 → 设计 → 实现 → 验证 → 回顾
@@ -220,7 +233,7 @@ Claude Code 子代理调用
     → TODO.md 被污染
 ```
 
-**核心问题**：验证阶段的逻辑是"如果失败数为 0 则通过"，但它没有检查"是否有新的测试被创建"或"是否有新的代码文件"。这是一个**空洞通过**——验证了空气。
+**核心问题**：验证阶段的逻辑是"如果失败数为 0 则通过"，但它没有检查"是否有新的测试被创建"或"是否有新的代码文件"。这是一个**空洞通过**，验证了空气。
 
 ### 为什么飞轮引擎在这里失败了？
 
@@ -247,7 +260,7 @@ Claude Code 子代理调用
 
 ### 背景
 
-Hermes Agent 的搜索系统支持多个后端（DuckDuckGo、SearXNG、Tavily、Brave 等），但用户希望通过一个包同时查询 7 个搜索引擎。`webserp` 正好满足这个需求——它是一个 Python 包，可以并行查询 Google、DuckDuckGo、Brave、Yahoo、Mojeek、Startpage、Presearch。
+Hermes Agent 的搜索系统支持多个后端（DuckDuckGo、SearXNG、Tavily、Brave 等），但用户希望通过一个包同时查询 7 个搜索引擎。`webserp` 正好满足这个需求，它是一个 Python 包，可以并行查询 Google、DuckDuckGo、Brave、Yahoo、Mojeek、Startpage、Presearch。
 
 ### 插件架构
 
@@ -298,11 +311,11 @@ class WebserpWebSearchProvider(WebSearchProvider):
 
 ### 卡在最后一步
 
-单元测试通过——`WebserpWebSearchProvider().search("Python")` 成功返回 3 个结果。
+单元测试通过，`WebserpWebSearchProvider().search("Python")` 成功返回 3 个结果。
 
 但端到端测试失败：`web_search_tool()` 返回"No web search provider configured"。
 
-**根因**：`agent/web_search_registry.py` 中的 `_LEGACY_PREFERENCE` 元组没有包含 `webserp`。这个元组是 fallback 解析的顺序列表——如果配置文件中没有指定后端，registry 会按这个列表逐个尝试。`webserp` 不在列表中，所以永远不会被自动发现。
+**根因**：`agent/web_search_registry.py` 中的 `_LEGACY_PREFERENCE` 元组没有包含 `webserp`。这个元组是 fallback 解析的顺序列表，如果配置文件中没有指定后端，registry 会按这个列表逐个尝试。`webserp` 不在列表中，所以永远不会被自动发现。
 
 ```python
 # web_search_registry.py 第 122-130 行
@@ -314,7 +327,7 @@ _LEGACY_PREFERENCE = (
 )
 ```
 
-会话在修复这一步之前被截断了。这是一个典型的"最后一步卡住"问题——99% 的工作完成了，但最关键的 1% 没有完成。
+会话在修复这一步之前被截断了。这是一个典型的"最后一步卡住"问题，99% 的工作完成了，但最关键的 1% 没有完成。
 
 ---
 
@@ -371,9 +384,9 @@ sleep 10
 ### 教训
 
 1. **监控应该在磁盘 80% 时告警**，而不是 100% 时崩溃
-2. **`~/.cache` 是定时炸弹**——pip、npm、各种工具的缓存会持续增长
-3. **MySQL InnoDB 的 redo log 需要预留空间**——即使数据量不大，日志文件也需要空间来调整大小
-4. **定时任务应该有磁盘空间前置检查**——在执行任何数据库操作前先检查 `df -h`
+2. **`~/.cache` 是定时炸弹**，pip、npm、各种工具的缓存会持续增长
+3. **MySQL InnoDB 的 redo log 需要预留空间**，即使数据量不大，日志文件也需要空间来调整大小
+4. **定时任务应该有磁盘空间前置检查**，在执行任何数据库操作前先检查 `df -h`
 
 ---
 
@@ -385,7 +398,7 @@ sleep 10
 
 **原因**：验证逻辑是"失败测试数为 0 则通过"。当没有新代码时，自然没有失败的测试。
 
-**解决**：验证阶段必须检查增量——`git diff --stat` 不为空、新增文件数 > 0、或测试总数有增加。
+**解决**：验证阶段必须检查增量，`git diff --stat` 不为空、新增文件数 > 0、或测试总数有增加。
 
 ### 坑 2：子代理只读不写
 
@@ -427,7 +440,7 @@ sleep 10
 
 1. **自动化成功的关键是任务边界清晰**：DocMind 的 Gradio 清理之所以成功，是因为它是一个定义明确的删除操作。飞轮引擎失败，是因为"实现一个模块"是一个需要多步推理的复杂任务。
 
-2. **验证逻辑不能只看失败数**：0 失败不等于成功。验证必须检查增量——有没有新文件、新测试、新代码。
+2. **验证逻辑不能只看失败数**：0 失败不等于成功。验证必须检查增量，有没有新文件、新测试、新代码。
 
 3. **最后一步最容易卡住**：webserp 接入完成了 99%，但最后的注册步骤被遗漏。在自动化流程中，"几乎完成"等于"没有完成"。
 

@@ -12,7 +12,7 @@ header:
 original_url: "https://whalemalus.com/articles/infra-auto-patrol"
 ---
 
-> **摘要**：一台服务器跑着十几个服务，端口冲突、容器暂停、飞书消息发不出去、飞轮迭代莫名卡死——这些问题如果靠人肉排查，每天至少烧掉半小时。本文记录了用 Hermes Agent 构建自动化巡检体系的实战过程，覆盖端口管理、飞轮守护、Cron 任务自愈三条主线。
+> **摘要**：一台服务器跑着十几个服务，端口冲突、容器暂停、飞书消息发不出去、飞轮迭代莫名卡死，这些问题如果靠人肉排查，每天至少烧掉半小时。本文记录了用 Hermes Agent 构建自动化巡检体系的实战过程，覆盖端口管理、飞轮守护、Cron 任务自愈三条主线。
 >
 > **关键词**：`Hermes Agent` `飞轮守护者` `端口管理` `自动化巡检` `Cron 自愈`
 
@@ -22,7 +22,7 @@ original_url: "https://whalemalus.com/articles/infra-auto-patrol"
 
 凌晨四点，手机弹出一条飞书消息：「智能体晨报发送失败，错误码 99992402」。
 
-点开一看，不只是晨报——日报、Wiki 扫描器、磁盘清理……六个定时任务全部报同一个错。服务器上二十几个端口，谁在监听谁不知道。DocMind 的飞轮迭代已经卡了 26 小时没人发现。
+点开一看，不只是晨报，日报、Wiki 扫描器、磁盘清理……六个定时任务全部报同一个错。服务器上二十几个端口，谁在监听谁不知道。DocMind 的飞轮迭代已经卡了 26 小时没人发现。
 
 这不是假设场景，这是 2026 年 5 月 22 日真实发生的事。
 
@@ -32,7 +32,18 @@ original_url: "https://whalemalus.com/articles/infra-auto-patrol"
 
 本文记录的是：如何用 Hermes Agent 把这些巡检工作自动化，让问题在发生时就被发现和修复，而不是等用户投诉。
 
-## 📖 目录
+
+## 目录
+
+- [楔子](#楔子)
+- [引言](#引言)
+- [1. 全景地图](#1-全景地图)
+- [2. 核心概念](#2-核心概念)
+- [3. 实战指南](#3-实战指南)
+- [4. 踩坑记录](#4-踩坑记录)
+- [5. 总结与展望](#5-总结与展望)
+
+## 目录
 
 1. [全景地图](#1-全景地图)
 2. [核心概念](#2-核心概念)
@@ -44,7 +55,7 @@ original_url: "https://whalemalus.com/articles/infra-auto-patrol"
 
 ## 1. 全景地图
 
-> 鸟瞰服务器自动化巡检的完整架构，理解各组件之间的关系
+> 服务器自动化巡检的完整架构，理解各组件之间的关系
 
 ### 架构图
 
@@ -250,7 +261,7 @@ def check_project(name, path):
 for name, path in PROJECTS.items():
     issues = check_project(name, path)
     if issues:
-        print(f"\
+        print(f"\\
 {name}:")
         for issue in issues:
             print(f"  {issue}")
@@ -283,7 +294,7 @@ EOF
 /home/claude-user/scripts/claude-code-wrapper.sh --prompt-file /tmp/docmind-prompt.txt
 ```
 
-这次修复没有成功——Claude Code CLI 显示「Not logged in」，API 代理仍然不可达。但守护者做了正确的事：记录了问题、尝试了修复、失败后通知了用户。
+这次修复没有成功，Claude Code CLI 显示「Not logged in」，API 代理仍然不可达。但守护者做了正确的事：记录了问题、尝试了修复、失败后通知了用户。
 
 ### 3.3 Cron Delivery 自愈
 
@@ -356,7 +367,7 @@ vim /root/.hermes/scripts/signal-collect.py
 # jobs.json 中 script 字段改为: /root/.hermes/scripts/signal-collect.py
 ```
 
-**教训**：Cron 的 `script` 字段只接受文件路径，不接受内联代码。这个坑很小，但在调试时很容易忽略——因为错误信息「Script not found」会让人去检查文件是否存在，而不是去检查 `script` 字段里存的到底是什么。
+**教训**：Cron 的 `script` 字段只接受文件路径，不接受内联代码。这个坑很小，但在调试时很容易忽略，因为错误信息「Script not found」会让人去检查文件是否存在，而不是去检查 `script` 字段里存的到底是什么。
 
 ## 4. 踩坑记录
 
@@ -408,11 +419,11 @@ xurl auth apps redirect-uri set it-is-great http://localhost:18081/callback
 
 ### 核心收获
 
-1. **巡检要自动化**：端口审计、飞轮健康检查、Cron delivery 状态——这些如果靠人肉检查，每天至少烧半小时，而且很容易漏掉。写成 Cron 任务后，问题在发生时就被发现。
+1. **巡检要自动化**：端口审计、飞轮健康检查、Cron delivery 状态，这些如果靠人肉检查，每天至少烧半小时，而且很容易漏掉。写成 Cron 任务后，问题在发生时就被发现。
 
 2. **修复要有梯度**：自动修复不是万能的。设计了三级梯度：尝试自动修复 → 修复失败则告警 → 告警后记录日志供人工排查。这次 DocMind 的 API 代理问题没有自动修复成功，但守护者正确地走了完整流程。
 
-3. **注册表是基础设施**：端口注册表、博客文章注册表、飞轮项目注册表——这些「台账」看起来不起眼，但没有它们，自动化脚本就没有基准线可以对比。
+3. **注册表是基础设施**：端口注册表、博客文章注册表、飞轮项目注册表，这些「台账」看起来不起眼，但没有它们，自动化脚本就没有基准线可以对比。
 
 ### 最佳实践
 

@@ -22,11 +22,11 @@ original_url: "https://whalemalus.com/articles/linux-cron-github-monitor"
 
 ## 楔子
 
-上周在 GitHub 上给一个开源项目提了个 Issue，描述了一个缓存一致性的 Bug。提交之后就开始等开发者回复。
+上周在 GitHub 上给一个开源项目提了个 Issue，描述了一个缓存一致性的 Bug。提交之后就开始等回复。
 
 第一天，没回复。第二天，没回复。第三天，我差点忘了这回事。
 
-直到一周后偶然点开 Issue 页面——开发者三天前就回复了，说"感谢反馈，下个版本修复"。还问了一个跟进问题，希望我补充一些信息。
+直到一周后偶然点开 Issue 页面——开发者三天前就回复了，说"感谢反馈，下个版本修复"。还问了一个跟进问题，希望我补充信息。
 
 但因为我没及时看到，这个 Issue 就这么沉了下去。
 
@@ -34,8 +34,30 @@ original_url: "https://whalemalus.com/articles/linux-cron-github-monitor"
 
 答案是——当然有。Linux 自带的 `cron` 就能搞定。
 
+## 引言
 
-## 全景地图：Linux 定时任务生态
+`cron` 是 Linux 系统里最古老也最靠谱的定时任务工具。定时备份数据库、自动清理日志、监控服务状态、自动部署——几乎所有"定期执行"的活，cron 都能干。
+
+这篇文章从基础讲起，带你掌握 cron 的核心用法，然后通过一个完整的实战案例——**自动监控 GitHub Issue 回复**——把 cron 和现代开发工具串起来，搭一套自动化运维工作流。
+
+你会学到：
+- cron 表达式的语法和含义
+- 如何创建、管理和调试定时任务
+- 如何用 `gh` CLI 与 GitHub API 交互
+- 如何构建一个完整的监控 + 通知脚本
+- 定时任务的常见坑和最佳实践
+
+## 目录
+
+- [全景地图](#全景地图)
+- [核心概念](#核心概念)
+- [实战指南](#实战指南)
+- [踩坑记录](#踩坑记录)
+- [总结](#总结)
+
+---
+
+## 全景地图
 
 > 鸟瞰 Linux 定时任务的完整生态，理解 cron 在其中的位置
 
@@ -91,37 +113,11 @@ cron daemon 每分钟检查一次
   什么      字段       命令      Issue回复   调试方法
 ```
 
-## 引言
+## 核心概念
 
-`cron` 是 Linux 系统中最古老也最可靠的定时任务工具。从定时备份数据库、自动清理日志，到监控服务状态、自动部署——几乎所有需要"定期执行"的任务，cron 都能胜任。
+### Cron 的工作原理
 
-本文将从基础开始，带你掌握 cron 的核心用法，并通过一个完整的实战案例——**自动监控 GitHub Issue 回复**——展示如何将 cron 与现代开发工具结合，打造自动化运维工作流。
-
-你将学到：
-- cron 表达式的语法和含义
-- 如何创建、管理和调试定时任务
-- 如何用 `gh` CLI 与 GitHub API 交互
-- 如何构建一个完整的监控 + 通知脚本
-- 定时任务的常见坑和最佳实践
-
-## 📖 目录
-
-1. [Cron 基础：什么是定时任务](#1-cron-基础什么是定时任务)
-2. [Cron 表达式语法详解](#2-cron-表达式语法详解)
-3. [创建和管理定时任务](#3-创建和管理定时任务)
-4. [实战：监控 GitHub Issue 回复](#4-实战监控-github-issue-回复)
-5. [进阶：定时任务的调试与日志](#5-进阶定时任务的调试与日志)
-6. [踩坑记录](#6-踩坑记录)
-7. [最佳实践](#7-最佳实践)
-8. [总结](#8-总结)
-
----
-
-## 1. Cron 基础：什么是定时任务
-
-### 1.1 Cron 的工作原理
-
-cron 是一个守护进程（daemon），它在后台运行，每分钟检查一次是否有需要执行的任务。
+cron 是一个守护进程（daemon），在后台跑着，每分钟检查一次有没有需要执行的任务。
 
 ```
 ┌─────────────────────────────────────────────┐
@@ -135,14 +131,14 @@ cron 是一个守护进程（daemon），它在后台运行，每分钟检查一
 └─────────────────────────────────────────────┘
 ```
 
-### 1.2 Cron 的两个核心概念
+### 两个核心概念
 
 | 概念 | 说明 | 文件位置 |
 |------|------|----------|
 | **crontab** | 定时任务配置文件，每个用户一份 | `/var/spool/cron/crontabs/` |
 | **cron 表达式** | 定义"什么时候执行"的时间规则 | 写在 crontab 里 |
 
-### 1.3 查看当前用户的定时任务
+### 查看当前定时任务
 
 ```bash
 # 列出当前用户的所有定时任务
@@ -152,9 +148,7 @@ crontab -l
 crontab -l -u username
 ```
 
-## 2. Cron 表达式语法详解
-
-### 2.1 基本格式
+### 表达式基本格式
 
 cron 表达式由 **5 个时间字段** + **1 个命令** 组成：
 
@@ -168,7 +162,7 @@ cron 表达式由 **5 个时间字段** + **1 个命令** 组成：
 * * * * * command_to_execute
 ```
 
-### 2.2 特殊符号
+### 特殊符号
 
 | 符号 | 含义 | 示例 |
 |------|------|------|
@@ -178,7 +172,7 @@ cron 表达式由 **5 个时间字段** + **1 个命令** 组成：
 | `/` | 步长 | `*/5 * * * *` = 每5分钟 |
 | `0` | 特定值 | `0 9 * * *` = 每天早上9点整 |
 
-### 2.3 常用表达式速查
+### 常用表达式速查
 
 ```bash
 # 每分钟执行
@@ -209,7 +203,7 @@ cron 表达式由 **5 个时间字段** + **1 个命令** 组成：
 0 */12 * * * /path/to/script.sh
 ```
 
-### 2.4 图解示例
+### 图示示例
 
 ```
 0 9 * * 1-5 /home/user/backup.sh
@@ -223,9 +217,9 @@ cron 表达式由 **5 个时间字段** + **1 个命令** 组成：
 = 工作日每天早上9点整执行备份
 ```
 
-## 3. 创建和管理定时任务
+## 实战指南
 
-### 3.1 编辑定时任务
+### 步骤 1：编辑定时任务
 
 ```bash
 # 交互式编辑（推荐）
@@ -235,7 +229,7 @@ crontab -e
 echo "0 9 * * * /path/to/script.sh" | crontab -
 ```
 
-### 3.2 从文件导入
+### 步骤 2：从文件导入
 
 ```bash
 # 创建任务文件
@@ -254,16 +248,16 @@ EOF
 crontab my-cron-tasks.txt
 ```
 
-### 3.3 删除所有定时任务
+### 步骤 3：删除所有定时任务
 
 ```bash
 # 删除当前用户的所有定时任务（谨慎！）
 crontab -r
 ```
 
-### 3.4 环境变量
+### 步骤 4：环境变量配置
 
-cron 的环境变量和你登录时不同！常见的坑：
+cron 的环境变量和你登录时不同，这里有个常见的坑：
 
 ```bash
 # ❌ 错误：cron 找不到 node
@@ -277,26 +271,24 @@ PATH=/usr/local/bin:/usr/bin:/bin
 0 9 * * * node /home/user/script.js
 ```
 
-## 4. 实战：监控 GitHub Issue 回复
-
-### 4.1 场景描述
+### 步骤 5：监控 GitHub Issue 回复 — 场景说明
 
 我们给开源项目 [lingview/dim_stack](https://github.com/lingview/dim_stack) 提了一个 Issue（[#12](https://github.com/lingview/dim_stack/issues/12)），需要监控开发者是否回复。
 
-### 4.2 前置准备
+### 步骤 6：前置准备
 
-#### 安装 gh CLI
+**安装 gh CLI**
 
 ```bash
 # Ubuntu/Debian
-curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | \\
+curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | \\\\
   dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | \\
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | \\\\
   tee /etc/apt/sources.list.d/github-cli.list > /dev/null
 apt-get update && apt-get install -y gh
 ```
 
-#### GitHub 认证
+**GitHub 认证**
 
 ```bash
 # 方式1：用 Classic Token 认证（推荐，需要 public_repo 权限）
@@ -309,14 +301,14 @@ gh auth login
 gh auth status
 ```
 
-#### 创建 Classic Token
+**创建 Classic Token**
 
 1. 打开 https://github.com/settings/tokens
 2. 点击 **Generate new token (classic)**
 3. 勾选 `public_repo` 权限
 4. 生成并复制 token
 
-### 4.3 编写监控脚本
+### 步骤 7：编写监控脚本
 
 创建文件 `/home/user/scripts/github-issue-monitor.sh`：
 
@@ -333,12 +325,12 @@ STATE_FILE="/tmp/github-issue-${OWNER}-${REPO}-${ISSUE_NUMBER}.state"
 # ================================
 
 # 获取 Issue 信息和评论
-COMMENTS=$(gh issue view $ISSUE_NUMBER \\
-  --repo "$OWNER/$REPO" \\
+COMMENTS=$(gh issue view $ISSUE_NUMBER \\\\
+  --repo "$OWNER/$REPO" \\\\
   --comments 2>&1)
 
-ISSUE_STATE=$(gh issue view $ISSUE_NUMBER \\
-  --repo "$OWNER/$REPO" \\
+ISSUE_STATE=$(gh issue view $ISSUE_NUMBER \\\\
+  --repo "$OWNER/$REPO" \\\\
   --json state -q '.state' 2>&1)
 
 # 检查是否成功获取
@@ -387,7 +379,7 @@ fi
 chmod +x /home/user/scripts/github-issue-monitor.sh
 ```
 
-### 4.4 设置定时任务
+### 步骤 8：设置定时任务
 
 ```bash
 # 编辑 crontab
@@ -401,7 +393,7 @@ crontab -e
 0 */2 * * * /home/user/scripts/github-issue-monitor.sh >> /var/log/github-monitor.log 2>&1
 ```
 
-### 4.5 增强版：带通知推送的脚本
+### 步骤 9：带通知推送的增强版脚本
 
 如果希望有新回复时自动发消息通知，可以结合各种通知渠道：
 
@@ -422,26 +414,26 @@ LAST_COUNT=0
 
 if [ "$CURRENT_COUNT" -gt "$LAST_COUNT" ]; then
   NEW_COUNT=$((CURRENT_COUNT - LAST_COUNT))
-  MSG="🔔 GitHub Issue #${ISSUE_NUMBER} 有 ${NEW_COUNT} 条新回复！\
+  MSG="🔔 GitHub Issue #${ISSUE_NUMBER} 有 ${NEW_COUNT} 条新回复！\\
 https://github.com/${OWNER}/${REPO}/issues/${ISSUE_NUMBER}"
   
   # ===== 通知方式（选择一种或多种） =====
   
   # 方式1：发送到企业微信机器人
-  # curl -X POST "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=*** \\
-  #   -H 'Content-Type: application/json' \\
+  # curl -X POST "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=*** \\\\
+  #   -H 'Content-Type: application/json' \\\\
   #   -d "{\"msgtype\":\"text\",\"text\":{\"content\":\"$MSG\"}}"
   
   # 方式2：发送到钉钉机器人
-  # curl -X POST "https://oapi.dingtalk.com/robot/send?access_token=*** \\
-  #   -H 'Content-Type: application/json' \\
+  # curl -X POST "https://oapi.dingtalk.com/robot/send?access_token=*** \\\\
+  #   -H 'Content-Type: application/json' \\\\
   #   -d "{\"msgtype\":\"text\",\"text\":{\"content\":\"$MSG\"}}"
   
   # 方式3：发送邮件
   # echo -e "$MSG" | mail -s "GitHub Issue 回复通知" your@email.com
   
   # 方式4：发送 Telegram 消息
-  # curl -s "https://api.telegram.org/botYOUR_TOKEN/sendMessage" \\
+  # curl -s "https://api.telegram.org/botYOUR_TOKEN/sendMessage" \\\\
   #   -d "chat_id=YOUR_CHAT_ID&text=$MSG"
   
   # 方式5：写入日志（最低限度）
@@ -451,7 +443,7 @@ https://github.com/${OWNER}/${REPO}/issues/${ISSUE_NUMBER}"
 fi
 ```
 
-### 4.6 完整工作流图
+### 步骤 10：完整工作流
 
 ```
 ┌──────────────┐     ┌──────────────────┐     ┌──────────────┐
@@ -471,9 +463,7 @@ fi
               └──────────┘   └──────────┘
 ```
 
-## 5. 进阶：定时任务的调试与日志
-
-### 5.1 查看 cron 日志
+### 步骤 11：查看 cron 日志
 
 ```bash
 # Ubuntu/Debian
@@ -486,7 +476,7 @@ tail -f /var/log/cron
 grep CRON /var/log/syslog | tail -20
 ```
 
-### 5.2 调试技巧
+### 步骤 12：调试技巧
 
 ```bash
 # 1. 先手动运行脚本，确认能正常工作
@@ -500,7 +490,7 @@ grep CRON /var/log/syslog | tail -20
 run-parts --test /etc/cron.d/
 ```
 
-### 5.3 常用调试命令
+### 步骤 13：常用调试命令
 
 ```bash
 # 查看当前 crontab
@@ -516,9 +506,9 @@ systemctl restart cron
 ps aux | grep cron
 ```
 
-## 6. 踩坑记录
+## 踩坑记录
 
-### 坑1：环境变量缺失
+### 坑 1：环境变量缺失
 
 **现象**：脚本手动运行正常，但 cron 执行时找不到命令
 
@@ -533,7 +523,7 @@ PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
 export PATH="/usr/local/bin:$PATH"
 ```
 
-### 坑2：相对路径失效
+### 坑 2：相对路径失效
 
 **现象**：脚本中使用了 `./config.yaml`，cron 执行时找不到文件
 
@@ -548,7 +538,7 @@ CONFIG="/home/user/scripts/config.yaml"
 cd "$(dirname "$0")"
 ```
 
-### 坑3：输出没有重定向
+### 坑 3：输出没有重定向
 
 **现象**：cron 执行了但看不到结果，也没有日志
 
@@ -560,7 +550,7 @@ cd "$(dirname "$0")"
 0 */6 * * * /path/to/script.sh >> /var/log/myscript.log 2>&1
 ```
 
-### 坑4：权限不足
+### 坑 4：权限不足
 
 **现象**：脚本手动运行正常，cron 执行时报 Permission denied
 
@@ -575,7 +565,7 @@ chmod +x /path/to/script.sh
 sudo crontab -e
 ```
 
-### 坑5：时区问题
+### 坑 5：时区问题
 
 **现象**：cron 没有在预期时间执行
 
@@ -590,9 +580,21 @@ timedatectl
 sudo timedatectl set-timezone Asia/Shanghai
 ```
 
-## 7. 最佳实践
+## 总结
 
-### 7.1 命名规范
+### 核心收获
+
+| 要点 | 说明 |
+|------|------|
+| cron 表达式 | 5个字段：分 时 日 月 周 |
+| 环境变量 | cron 的 PATH 很精简，用绝对路径 |
+| 输出重定向 | 一定要重定向到日志文件 |
+| 权限 | 确保脚本有执行权限 |
+| 调试 | 先手动运行，再配置 cron |
+
+### 最佳实践
+
+**命名规范**
 
 ```bash
 # 好的命名：描述性 + 日期
@@ -606,7 +608,7 @@ sudo timedatectl set-timezone Asia/Shanghai
 /home/user/scripts/script1.sh
 ```
 
-### 7.2 日志规范
+**日志规范**
 
 ```bash
 # 在脚本中添加日志
@@ -618,7 +620,7 @@ log "开始执行..."
 log "任务完成"
 ```
 
-### 7.3 错误处理
+**错误处理**
 
 ```bash
 #!/bin/bash
@@ -631,7 +633,7 @@ if ! gh issue view 12 --repo owner/repo > /dev/null 2>&1; then
 fi
 ```
 
-### 7.4 锁机制（防止重复执行）
+**锁机制（防止重复执行）**
 
 ```bash
 #!/bin/bash
@@ -650,19 +652,7 @@ touch "$LOCKFILE"
 # ... 执行任务 ...
 ```
 
-## 8. 总结
-
-### 核心要点
-
-| 要点 | 说明 |
-|------|------|
-| cron 表达式 | 5个字段：分 时 日 月 周 |
-| 环境变量 | cron 的 PATH 很精简，用绝对路径 |
-| 输出重定向 | 一定要重定向到日志文件 |
-| 权限 | 确保脚本有执行权限 |
-| 调试 | 先手动运行，再配置 cron |
-
-### 常用命令速查
+**常用命令速查**
 
 ```bash
 crontab -e          # 编辑定时任务

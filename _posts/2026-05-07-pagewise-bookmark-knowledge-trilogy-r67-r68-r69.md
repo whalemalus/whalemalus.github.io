@@ -16,13 +16,31 @@ original_url: "https://whalemalus.com/articles/pagewise-bookmark-knowledge-trilo
 
 > 一天三次飞轮迭代，从学习追踪到智能推荐再到数据洞察，书签知识体系闭环成型。
 
-## 背景
+## 楔子
+
+书签系统的三层基础（预览、搜索、关联）已经就位，但用户的下一个问题很快浮现：我学到哪了？接下来该学什么？我的知识结构健康吗？
+
+这三个问题，指向的是从「工具」到「体系」的跃迁——不只是管理书签，而是构建一个有反馈、有洞察的个人知识系统。
+
+## 引言
+
 
 在前几轮迭代中，我们已经完成了书签知识图谱（BookmarkGraph）、语义搜索（R65）、知识关联（R66）和内容预览（R64）。这些模块解决了「书签怎么组织」和「怎么找到相关知识」的问题。
 
 但用户真正关心的还有：**我学到哪了？接下来该学什么？我的知识结构健康吗？**
 
 2026-05-06 的三轮迭代（R67-R69）正是为了回答这三个问题。
+
+
+## 目录
+
+- [R67: BookmarkLearningProgress -- 学习进度追踪](#r67-bookmarklearningprogress----学习进度追踪)
+- [R68: BookmarkAIRecommendations -- AI 智能推荐](#r68-bookmarkairecommendations----ai-智能推荐)
+- [R69: BookmarkStatistics -- 统计仪表盘](#r69-bookmarkstatistics----统计仪表盘)
+- [飞轮迭代的效率](#飞轮迭代的效率)
+- [架构演进：从单点到闭环](#架构演进从单点到闭环)
+- [下一步](#下一步)
+
 
 ## R67: BookmarkLearningProgress -- 学习进度追踪
 
@@ -79,9 +97,9 @@ const source = recommender.getLastSource(); // 'ai' | 'fallback'
 
 ```javascript
 // 支持 ```json ... ``` 包裹
-const cleaned = raw.replace(/^```(?:json)?\s*\
-?/i, '').replace(/\
-?```\s*$/i, '');
+const cleaned = raw.replace(/^```(?:json)?\\s*\\
+?/i, '').replace(/\\
+?```\\s*$/i, '');
 // 字段校验 + 类型过滤
 const valid = parsed.filter(r => r.topic && VALID_TYPES.includes(r.type));
 ```
@@ -161,4 +179,18 @@ R69 统计仪表盘 <- R68 AI 推荐 <- R67 学习进度
 
 ---
 
-*本文由 Hermes Agent 根据飞轮迭代报告自动生成。技术细节基于 PageWise v2.x 代码库。*
+## 总结
+
+### 核心收获
+
+- BookmarkLearningProgress：学习进度追踪，9 个 API 覆盖状态管理、进度统计、历史记录
+- BookmarkAIRecommendations：隐私优先的 AI 推荐，只发送统计摘要不发送原始数据，支持三种策略
+- BookmarkStatistics：纯函数统计仪表盘，趋势、分布、热力图、总览四个维度
+- 书签知识体系形成完整闭环：采集、组织、关联、追踪、推荐
+
+### 最佳实践
+
+- 依赖反转（构造函数注入）让模块便于测试，空数组优雅降级避免崩溃
+- AI 调用必须有 fallback（基于规则的推荐），30 分钟 TTL 缓存避免重复调用
+- JSON 容错处理是 AI 集成的必修课：处理 markdown 包裹、字段缺失、无效类型
+- ISO 8601 周算法加 UTC 一致性，避免时区和跨年导致的统计偏差

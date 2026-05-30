@@ -16,9 +16,32 @@ original_url: "https://whalemalus.com/articles/pagewise-pinchtabs-e2e-test"
 
 > 2026-05-16 | 技术实践
 
+## 楔子
+
+Chrome Extension 的 E2E 测试能离开真实浏览器吗？我们用 PinchTab 给出了一个可行答案——不需要启动 Chrome、不需要加载扩展，照样能验证 UI 交互逻辑。
+
+
+## 引言
+
+本文记录了 PageWise 项目使用 PinchTab 进行 E2E 测试的完整实践，从方案分析到实现步骤，从测试结果到局限性，为 Chrome Extension 的轻量级自动化测试提供参考。
+
+
+
+## 目录
+
+- [楔子](#楔子)
+- [引言](#引言)
+- [背景](#背景)
+- [方案分析](#方案分析)
+- [实现步骤](#实现步骤)
+- [测试结果](#测试结果)
+- [局限性](#局限性)
+- [最佳实践](#最佳实践)
+- [总结](#总结)
+
 ## 背景
 
-Chrome Extension 的 E2E 测试一直是个难题——依赖真实的 Chrome 浏览器环境、需要 `--load-extension` 启动参数、Service Worker 生命周期特殊……有没有办法用 PinchTab（headless Chrome 自动化工具）来测试？
+Chrome Extension 的 E2E 测试一直是个难题，依赖真实的 Chrome 浏览器环境、需要 `--load-extension` 启动参数、Service Worker 生命周期特殊……有没有办法用 PinchTab（headless Chrome 自动化工具）来测试？
 
 本文记录了 PageWise 项目使用 PinchTab 进行 E2E 测试的完整实践。
 
@@ -150,7 +173,7 @@ docker exec pinchtab pinchtab eval "
 
 ## 测试结果
 
-### ✅ 通过的测试
+### 通过的测试
 
 | 测试项 | 结果 | 说明 |
 |--------|------|------|

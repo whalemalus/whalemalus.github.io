@@ -16,7 +16,14 @@ original_url: "https://whalemalus.com/articles/pagewise-bookmark-trilogy-r64-r65
 
 > 2026-05-05，飞轮迭代引擎完成了 R64、R65、R66 三轮迭代，将书签系统从「能看到」升级到「能搜索」再到「能关联」。本文记录这次密集交付的过程与技术细节。
 
-## 背景
+## 楔子
+
+一天之内完成三轮迭代，交付 1426 行代码和 96 个测试用例——这不是加班赶工，而是飞轮迭代引擎的日常节奏。
+
+2026 年 5 月 5 日，PageWise 的书签系统经历了一次密集的功能跃迁：从「能看到」到「能搜索」再到「能关联」，三层能力在 8 小时内依次就位。
+
+## 引言
+
 
 智阅 PageWise 是一个纯前端的 Chrome 浏览器扩展，帮助用户在浏览技术网页时即时向 AI 提问，并将回答整理成结构化知识库。在 v2.0 发布后，书签系统成为下一个重点方向。
 
@@ -24,10 +31,21 @@ original_url: "https://whalemalus.com/articles/pagewise-bookmark-trilogy-r64-r65
 
 5 月 5 日，引擎连续完成了三轮迭代，覆盖了书签功能的三个核心层面。
 
+
+## 目录
+
+- [R64: 书签内容预览 BookmarkContentPreview](#r64-书签内容预览-bookmarkcontentpreview)
+- [R65: 语义搜索 BookmarkSemanticSearch](#r65-语义搜索-bookmarksemanticsearch)
+- [R66: 知识关联 BookmarkKnowledgeCorrelation](#r66-知识关联-bookmarkknowledgecorrelation)
+- [三轮迭代的飞轮数据](#三轮迭代的飞轮数据)
+- [技术观察](#技术观察)
+- [下一步](#下一步)
+
+
 ## R64: 书签内容预览 BookmarkContentPreview
 
-**模块**: `lib/bookmark-preview.js` — 231 行  
-**测试**: 31 用例全绿  
+**模块**: `lib/bookmark-preview.js` — 231 行
+**测试**: 31 用例全绿
 **Guard 评分**: 92.15 / 100 ✅
 
 这是书签系统的「展示层」。用户在侧边栏看到书签时，需要快速了解这个链接是什么。BookmarkContentPreview 提供三种预览模式：
@@ -45,8 +63,8 @@ original_url: "https://whalemalus.com/articles/pagewise-bookmark-trilogy-r64-r65
 
 ## R65: 语义搜索 BookmarkSemanticSearch
 
-**模块**: `lib/bookmark-semantic-search.js` — 552 行  
-**测试**: 35 用例全绿  
+**模块**: `lib/bookmark-semantic-search.js` — 552 行
+**测试**: 35 用例全绿
 **Guard 评分**: 93.45 / 100 ✅
 
 有了预览，下一步是「找得到」。用户收藏了上百个书签后，靠文件夹浏览效率太低。BookmarkSemanticSearch 引入了基于 TF-IDF 的语义搜索引擎：
@@ -76,8 +94,8 @@ original_url: "https://whalemalus.com/articles/pagewise-bookmark-trilogy-r64-r65
 
 ## R66: 知识关联 BookmarkKnowledgeCorrelation
 
-**模块**: `lib/bookmark-knowledge-link.js` — 643 行  
-**测试**: 30 用例全绿  
+**模块**: `lib/bookmark-knowledge-link.js` — 643 行
+**测试**: 30 用例全绿
 **Guard 评分**: 93.0 / 100 ✅
 
 前两步解决了「展示」和「搜索」，R66 要解决的是「关联」—— 把书签和知识库条目连接起来，形成知识图谱的边。
@@ -119,7 +137,7 @@ URL 匹配采用分层策略：
 
 ### 飞轮效应明显
 
-到了 R66，Claude Code 对项目上下文的理解已经非常深入。它知道如何复用 `EmbeddingEngine` 的 TF-IDF 算法，知道测试文件的命名规范，知道 `EmbeddingEngine` 的实例化方式。前几轮迭代建立的代码模式，后续迭代自动复用。
+到了 R66，Claude Code 对项目上下文的理解已经非常到位。它知道如何复用 `EmbeddingEngine` 的 TF-IDF 算法，知道测试文件的命名规范，知道 `EmbeddingEngine` 的实例化方式。前几轮迭代建立的代码模式，后续迭代自动复用。
 
 ### Guard 评分的一致性
 
@@ -130,7 +148,7 @@ URL 匹配采用分层策略：
 ```
 BookmarkContentPreview (展示层)
     ↓ 提供内容预览文本
-BookmarkSemanticSearch (检索层)  
+BookmarkSemanticSearch (检索层)
     ↓ 建立搜索索引
 BookmarkKnowledgeCorrelation (关联层)
     ↓ 构建知识图谱
@@ -148,4 +166,17 @@ BookmarkKnowledgeCorrelation (关联层)
 
 ---
 
-*本文由 Hermes Agent 自动生成，基于 PageWise 飞轮迭代引擎的 R64-R66 迭代报告。*
+## 总结
+
+### 核心收获
+
+- BookmarkContentPreview：纯数据模块，三种预览模式，单次生成不到 5ms
+- BookmarkSemanticSearch：TF-IDF 语义搜索加混合搜索，1000 条书签不到 5 秒建索引
+- BookmarkKnowledgeCorrelation：多维度关联（URL 匹配加语义相似加标签重叠），支持双向查询
+- 三层解耦架构：展示层、检索层、关联层，上层依赖下层但下层不感知上层
+
+### 最佳实践
+
+- 飞轮迭代到了后期，Claude Code 对项目上下文的理解越来越到位，前几轮建立的代码模式被自动复用
+- Guard Agent 的量化审查（92-93 分区间）确保了自动化流程中的代码质量稳定性
+- 纯 ES Module 零外部依赖的设计，让模块可以独立测试和部署

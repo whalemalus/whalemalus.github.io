@@ -211,7 +211,7 @@ adsense_script = '<script async src="https://pagead2.googlesyndication.com/pagea
 existing_code = "..."  # 从数据库读取
 
 # 3. 追加 AdSense 脚本
-new_code = existing_code + '\\
+new_code = existing_code + '\
 ' + adsense_script
 
 # 4. Base64 编码（避免 SQL 特殊字符问题）
@@ -223,7 +223,7 @@ sql = f"UPDATE site_config SET global_head_code = FROM_BASE64('{b64}') WHERE id 
 
 ```bash
 # 执行更新
-docker exec -i dimstack-mysql mysql --default-character-set=utf8mb4 \\
+docker exec -i dimstack-mysql mysql --default-character-set=utf8mb4 \
   -uroot -pdimstack2026 dim_stack < /tmp/update_head.sql
 
 # 清缓存 + 重启

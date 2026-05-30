@@ -16,6 +16,26 @@ original_url: "https://whalemalus.com/articles/vps-resource-protection-four-laye
 
 > 当你的服务器只有 3.8GB 内存，却跑着 8 个 Docker 容器时，随时可能因为内存耗尽而卡死。本文分享一套实战验证的四层防护方案。
 
+## 楔子
+
+一台 3.8GB 内存的 VPS，部署了 DocMind、AxonHub、DimStack、PinchTab、Nginx Proxy Manager、Hermes Agent、Claude Code 等多个服务。内存使用率常年在 90% 以上，随时可能因为 OOM Killer 随机杀死关键进程，甚至服务器直接卡死需要硬重启。
+
+这不是理论推演，是真实生产环境的日常。本文记录了从「每天提心吊胆」到「稳定运行」的完整防护方案。
+
+## 引言
+
+本文介绍一套在 3.8GB 内存 VPS 上经过实战验证的四层资源防护体系：earlyoom 守护进程（L1）、Docker 容器内存硬限制（L2）、智能看门狗自动暂停/恢复（L3）、Docker 日志轮转限制（L4）。每层解决不同粒度的资源问题，组合使用后系统稳定性显著提升。
+
+## 目录
+
+- [问题背景](#问题背景)
+- [解决方案：四层防护](#解决方案四层防护)
+- [整体架构](#整体架构)
+- [验证效果](#验证效果)
+- [关键经验](#关键经验)
+- [相关工具](#相关工具)
+- [总结](#总结)
+
 ## 问题背景
 
 一台 3.8GB 内存的 VPS，部署了多个服务：
@@ -129,8 +149,8 @@ is_protected() {
 
 # 需要回收时，暂停最大可回收容器
 if [ "$MEM" -ge "$MEM_THRESHOLD" ] || [ "$SWAP" -ge "$SWAP_THRESHOLD" ]; then
-    for container in $(docker stats --no-stream --format "{{.Name}}\t{{.MemPerc}}" | \
-        while IFS=$'\t' read name mem; do
+    for container in $(docker stats --no-stream --format "{{.Name}}\\\\t{{.MemPerc}}" | \\\\
+        while IFS=$'\\\\t' read name mem; do
             is_protected "$name" || echo "$(echo $mem | tr -d '%') $name"
         done | sort -rn | awk '{print $2}'); do
         docker pause "$container"
@@ -240,6 +260,10 @@ dimstack-mysql          1.01%   56.88MiB / 256MiB    22.2%
 - [earlyoom](https://github.com/rfjakob/earlyoom) — Early OOM Daemon for Linux（⭐ 4000+）
 - [Docker resource constraints](https://docs.docker.com/config/containers/resource_constraints/) — Docker 官方资源限制文档
 - [cgroups v2](https://www.kernel.org/doc/html/latest/admin-guide/cgroup-v2.html) — Linux 内核资源控制
+
+## 总结
+
+3.8GB 内存跑 8 个 Docker 容器，核心在于四层防护的组合使用：L1 earlyoom 在系统层面兜底、L2 Docker 内存硬限制隔离每个容器、L3 智能看门狗自动调度非核心服务、L4 日志轮转防止磁盘隐患。内存使用率从 90%+ 降到 50-60%，系统稳定运行。关键经验：容器必须设内存限制、暂停比杀死更优雅、保护名单不可省略。
 
 ---
 

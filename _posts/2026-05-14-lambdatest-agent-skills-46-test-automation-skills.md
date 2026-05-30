@@ -16,6 +16,29 @@ original_url: "https://whalemalus.com/articles/lambdatest-agent-skills-46-test-a
 
 > 你还在让 AI 写出一堆脆弱的测试代码吗？LambdaTest 开源的 agent-skills 项目，教你的 AI 助手成为"高级 QA 自动化架构师"。
 
+## 楔子
+
+让 AI 帮你写测试代码，得到的往往是结构不规范、依赖混乱、只能本地跑的脆弱代码。LambdaTest 开源了一套 46 个生产级测试技能，目标是让 AI 一次性生成「能上线」的测试代码。
+
+## 引言
+
+本文解析 LambdaTest 开源的 agent-skills 项目——46 个覆盖 15+ 编程语言的生产级测试自动化 AI 技能。从项目架构、技能分类到实战代码示例，全面了解这套测试技能库。
+
+## 目录
+
+- [楔子](#楔子)
+- [引言](#引言)
+- [为什么需要 Agent Skills？](#为什么需要 Agent Skills？)
+- [项目概览](#项目概览)
+- [技能分类](#技能分类)
+- [快速上手](#快速上手)
+- [技能架构](#技能架构)
+- [实战示例：Playwright 技能精华](#实战示例：Playwright 技能精华)
+- [Pytest 技能精华](#Pytest 技能精华)
+- [框架迁移技能](#框架迁移技能)
+- [对我们的启发](#对我们的启发)
+- [总结](#总结)
+
 ## 为什么需要 Agent Skills？
 
 当你让 Claude Code、Copilot 或 Cursor 帮你写测试时，得到的往往是：
@@ -191,7 +214,7 @@ def test_string_length(input, expected):
 
 ## 总结
 
-LambdaTest Agent Skills 是目前最全面的测试自动化 AI 技能库。如果你用 Claude Code、Copilot 或 Cursor 写测试代码，强烈建议安装对应框架的技能——AI 生成的代码质量会从"能跑"提升到"能上线"。
+LambdaTest Agent Skills 是目前最全面的测试自动化 AI 技能库。如果你用 Claude Code、Copilot 或 Cursor 写测试代码，强烈建议安装对应框架的技能，AI 生成的代码质量会从"能跑"提升到"能上线"。
 
 **项目地址：** https://github.com/LambdaTest/agent-skills
 

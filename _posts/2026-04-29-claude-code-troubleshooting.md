@@ -32,31 +32,31 @@ original_url: "https://whalemalus.com/articles/claude-code-troubleshooting"
 
 那是什么？
 
-直到我用 `ls -la` 看了一眼项目目录，真相才浮出水面：`tests/` 目录的 owner 是 `root`，而 Claude Code 运行在 `claude-user` 用户下。
+直到我用 `ls -la` 看了一眼项目目录，才发现：`tests/` 目录的 owner 是 `root`，而 Claude Code 运行在 `claude-user` 用户下。
 
 **它不是慢，它是被权限挡住了，然后把所有轮次都浪费在了"怎么绕过权限"上。**
 
+---
+
 ## 引言
 
-这个故事的核心教训很简单：**在 AI Agent 的世界里，权限问题不会报错然后停止，它会默默消耗你所有的调用轮次，让你以为是性能问题。**
+核心教训其实很简单：**在 AI Agent 的世界里，权限问题不会报错然后停止，它会默默消耗你所有的调用轮次，让你以为是性能问题。**
 
-这篇文章会讲清楚三件事：
+这篇文章会讲三件事：
 
 1. **怎么发现的** — 从"网关慢"到"权限问题"的排查过程
 2. **怎么修的** — 一行 `chown` 解决，加上 5 个 Claude Code 调优技巧
 3. **修完之后** — 10 轮飞轮迭代，测试覆盖从 537 到 663
 
-如果你也在用 Claude Code 做自动化开发，这篇文章能帮你避开一个隐蔽的坑。
-
 ---
 
-## 📖 目录
+## 目录
 
-1. [全景地图](#全景地图)
-2. [核心概念](#核心概念)
-3. [实战指南](#实战指南)
-4. [踩坑记录](#踩坑记录)
-5. [总结与展望](#总结与展望)
+- [全景地图](#全景地图)
+- [核心概念](#核心概念)
+- [实战指南](#实战指南)
+- [踩坑记录](#踩坑记录)
+- [总结](#总结)
 
 ---
 
@@ -119,7 +119,7 @@ original_url: "https://whalemalus.com/articles/claude-code-troubleshooting"
 
 ## 核心概念
 
-### 1. Claude Code 的轮次机制
+### Claude Code 的轮次机制
 
 Claude Code 每次调用有**最大轮次限制**（默认 12 轮）。每一轮包括：思考 → 生成工具调用 → 执行 → 观察结果。
 
@@ -136,7 +136,7 @@ Claude Code 每次调用有**最大轮次限制**（默认 12 轮）。每一轮
 
 **类比**：这就像一个实习生被锁在办公室外面，他不会直接告诉你"我进不去"，而是会花一整天尝试各种方式——翻窗户、找物业、撬锁——最后你才发现他根本没有钥匙。
 
-### 2. 用户隔离与权限模型
+### 用户隔离与权限模型
 
 Claude Code 运行在 `claude-user`（uid=1000）下，而 Hermes Agent 运行在 `root` 下。
 
@@ -147,7 +147,7 @@ claude-user 尝试写入 → Permission denied
 
 **根本原因**：Hermes 的 `write_file` 工具以 root 身份创建文件，导致文件 owner 是 root。当 Claude Code（claude-user）尝试在同一目录创建测试文件时，权限不足。
 
-### 3. 飞轮迭代方法论
+### 飞轮迭代方法论
 
 飞轮迭代（Flywheel Iteration）是一种增量式开发方法：
 
@@ -167,7 +167,7 @@ Round N: 选择模块 → 生成测试 → 运行验证 → 提交 → 下一轮
 
 ## 实战指南
 
-### 第一步：排查 Claude Code "慢"的问题
+### 排查 Claude Code "慢"的问题
 
 ```bash
 # 1. 测量 AxonHub 网关延迟
@@ -187,7 +187,7 @@ ps aux | grep claude
 # claude-user  12345  ... claude ...
 ```
 
-### 第二步：修复权限问题
+### 修复权限问题
 
 ```bash
 # 一行命令解决
@@ -198,7 +198,7 @@ ls -la /home/claude-user/pagewise/tests/
 # drwxr-xr-x 2 claude-user claude-user 4096 ... tests/  ← 修复成功
 ```
 
-### 第三步：Claude Code 调优技巧
+### Claude Code 调优技巧
 
 #### 技巧1：`--bare --effort low` 减少思考开销
 
@@ -265,7 +265,7 @@ su - claude-user -c '
 '
 ```
 
-### 第四步：飞轮迭代执行
+### 飞轮迭代执行
 
 修复权限后，执行 10 轮飞轮迭代：
 
@@ -345,11 +345,11 @@ su - claude-user -c 'claude < /tmp/prompt.txt'
 
 ---
 
-## 总结与展望
+## 总结
 
 ### 核心收获
 
-1. **权限问题是 AI Agent 的隐形杀手** — 它不会报错停止，而是静默消耗所有轮次
+1. **权限问题是 AI Agent 场景下最容易被忽视的问题** — 它不会报错停止，而是静默消耗所有轮次
 2. **排查"慢"的问题，先看权限** — `ls -la` 比 `curl` 测延迟更有用
 3. **飞轮迭代有效** — 聚焦单模块 + 自动测试 + 每轮提交，10 轮增长 126 个测试
 
